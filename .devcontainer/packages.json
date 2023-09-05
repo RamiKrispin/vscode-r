@@ -1,0 +1,46 @@
+{
+    "packages": [
+        {
+            "package": "BH",
+            "version":"1.81.0-1"
+        },
+        {
+            "package": "languageserver",
+            "version":"0.3.12"
+        },
+        {
+            "package": "httpgd",
+            "version":"1.3.1"
+        },
+        {
+            "package": "rmarkdown",
+            "version":"2.21"
+        },
+        {
+            "package": "dplyr",
+            "version":"1.1.3"
+        },
+        {
+            "package": "ggplot2",
+            "version":"3.4.3"
+        },
+        {
+            "package": "shiny",
+            "version":"1.7.4"
+        },
+        {
+            "package": "plotly",
+            "version":"4.10.2"
+        }
+    ],
+    "package_dev": [
+        {
+            "package": "BH",
+            "version":"1.81.0-1"
+        },
+        {
+            "package": "httpgd",
+            "version":"1.3.1"
+        }
+    ]
+}
