@@ -20,24 +20,23 @@
     "customizations": {
         "vscode": {
             "extensions": [
-                # Docs/text files
-                "quarto.quarto",
-                "purocean.drawio-preview",
-                "redhat.vscode-yaml",
-                "yzhang.markdown-all-in-one",
-                # Docker
-                "ms-azuretools.vscode-docker",
-                "ms-vscode-remote.remote-containers",
-                # Python
-                "ms-python.python",
-                "ms-toolsai.jupyter",
-                # R
+                # R Extensions
                 "rdebugger.r-debugger",
                 "reditorsupport.r",
                 "REditorSupport.r",
                 "REditorSupport.r-lsp", 
-                "RDebugger.r-debugger"
-                
+                "RDebugger.r-debugger",
+                # Documentation Extensions
+                "quarto.quarto",
+                "purocean.drawio-preview",
+                "redhat.vscode-yaml",
+                "yzhang.markdown-all-in-one",
+                # Docker Supporting Extensions
+                "ms-azuretools.vscode-docker",
+                "ms-vscode-remote.remote-containers",
+                # Python Extensions
+                "ms-python.python",
+                "ms-toolsai.jupyter"
             ]
         } 
     }, 
