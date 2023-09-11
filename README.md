@@ -153,10 +153,10 @@ For better security, log in with a limited-privilege personal access token. Lear
 
 ### Hello World!
 
-There is no better way to test if Docker was installed properly than by running whalesay (or 🐳  say) Docker's most `Hello World!` common example. The whalesay is an adaption of the Linux cowsay (🐮 say) game using a whale instead of a cow to print some text. Let's run the below code from the terminal to print `Hello Python Users! 👋 🐍`:
+There is no better way to test if Docker was installed properly than by running whalesay (or 🐳  say) Docker's most `Hello World!` common example. The whalesay is an adaption of the Linux cowsay (🐮 say) game using a whale instead of a cow to print some text. Let's run the below code from the terminal to print `Hello R Users! 👋 😎`:
 
 ``` shell
-docker run docker/whalesay cowsay Hello Python Users! 👋 🐍
+docker run docker/whalesay cowsay Hello R Users! 👋 😎
 ```
 If this is the first time you are using Docker or your first time using the `whalesay` image you should expect the following message:
 
@@ -184,10 +184,10 @@ Status: Downloaded newer image for docker/whalesay:latest
 
 And this is the expected output:
 
-``` 
-_______________________________
-< Hello Python Users! 👋 🐍 >
- -------------------------------
+``` shell
+__________________________
+< Hello R Users! 👋 😎 >
+ --------------------------
     \
      \
       \
