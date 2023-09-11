@@ -114,7 +114,94 @@ Here is how to install an extension on VScode:
 
 **Note:** The Dev Containers extension is required to launch the dockerized environment. We will see later in this tutorial how to set and install the necessary extensions for your dockerized environment automatically with the `devcontainer.json` file.
 
+### Setting Docker
+Various ways exist to build and run Docker images on different operations systems. For the purpose of this guide, we will be utilizing Docker Desktop. It is a user-friendly container management interface that is compatible with MacOS, Windows, and Linux operating systems.
 
+**Note:** Docker Desktop is free for personal use but requires a license for commercial use. For further information, please refer to https://www.docker.com/pricing/.
+
+To install Docker Desktop, go to Docker website and follow the installation instructions according to your OS:
+<figure>
+ <img src="images/docker-install.png" width="100%" align="center"/></a>
+<figcaption> Figure 3 - Docker Desktop download page</figcaption>
+</figure>
+
+<br>
+
+### Docker Hub
+
+Container Registry has a similar functionality as Github for code, and it uses to store and share images. There are many container registries, and the most common is  Docker Hub. We will use throughout the tutorial Docker Hub to pull different images, such as Python built-in images. To register and create an account go to https://hub.docker.com and follow the registration instructions.
+
+After installing Docker Desktop and setting account on Docker Hub, open Docker Desktop, and from the command line, login to Docker Hub:
+
+``` shell
+ docker login
+```
+
+You will have to enter your username and password, and you should expect the following output if the login is successful:
+
+``` shell
+Login with your Docker ID to push and pull images from Docker Hub. If you don't have a Docker ID, head over to https://hub.docker.com to create one.
+Username: rkrispin
+Password:
+Login Succeeded
+
+Logging in with your password grants your terminal complete access to your account.
+For better security, log in with a limited-privilege personal access token. Learn more at https://docs.docker.com/go/access-tokens/
+```
+**Note:**  Docker Hub is completely public (for the free tier). Any image you push and store there will be available for all other users. Regardless if your container registry is public or not, **NEVER** store credentials, passwords, or any other sensitive information on your Docker images. 
+
+
+### Hello World!
+
+There is no better way to test if Docker was installed properly than by running whalesay (or 🐳  say) Docker's most `Hello World!` common example. The whalesay is an adaption of the Linux cowsay (🐮 say) game using a whale instead of a cow to print some text. Let's run the below code from the terminal to print `Hello Python Users! 👋 🐍`:
+
+``` shell
+docker run docker/whalesay cowsay Hello Python Users! 👋 🐍
+```
+If this is the first time you are using Docker or your first time using the `whalesay` image you should expect the following message:
+
+``` shell
+Unable to find image 'docker/whalesay:latest' locally
+```
+
+That is a generic message that notifies that the requested image cannot be found locally, and Docker will try to pull the image from the hub (if specified) and follow by downloading the image:
+
+
+``` shell
+latest: Pulling from docker/whalesay
+Image docker.io/docker/whalesay:latest uses outdated schema1 manifest format. Please upgrade to a schema2 image for better future compatibility. More information at https://docs.docker.com/registry/spec/deprecated-schema-v1/
+e190868d63f8: Pull complete
+909cd34c6fd7: Pull complete
+0b9bfabab7c1: Pull complete
+a3ed95caeb02: Pull complete
+00bf65475aba: Pull complete
+c57b6bcc83e3: Pull complete
+8978f6879e2f: Pull complete
+8eed3712d2cf: Pull complete
+Digest: sha256:178598e51a26abbc958b8a2e48825c90bc22e641de3d31e18aaf55f3258ba93b
+Status: Downloaded newer image for docker/whalesay:latest
+```
+
+And this is the expected output:
+
+``` 
+_______________________________
+< Hello Python Users! 👋 🐍 >
+ -------------------------------
+    \
+     \
+      \
+                    ##        .
+              ## ## ##       ==
+           ## ## ## ##      ===
+       /""""""""""""""""___/ ===
+  ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~
+       \______ o          __/
+        \    \        __/
+          \____\______/
+```
+
+If you are able to run the `whalesay` app you are ready to get started with Docker.
 
 
 ## Summary
