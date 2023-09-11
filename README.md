@@ -10,6 +10,11 @@ See also:
 - [Docker for Data Scientists 🐳](https://github.com/RamiKrispin/Introduction-to-Docker) (WIP) 
 
 
+<figure>
+<img src="images/vscode-shiny1024.gif" width="100%" align="center"/></a>
+
+</figure>
+
 ## Table of Content:
 
 * Motivation
