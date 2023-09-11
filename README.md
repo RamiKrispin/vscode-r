@@ -99,7 +99,22 @@ Installing VScode is straightforward - go to the VScode website https://code.vis
 
 Download the installation file and follow the instructions. 
 
-To set a dockerized environment in VScode we will need to install the [Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension, which enables to open a folder and execute a code inside a Docker container 
+To set a dockerized environment in VScode we will need to install the [Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension, which enables to open a folder and execute a code inside a Docker container.
+
+Here is how to install an extension on VScode: 
+- Click the Extensions button on the left menu (mark with a purple arrow on the screenshot below) 
+- Type the extension name on the search menu (see the yellow rectangular). You can see the search results below, and clicking on each extension will open a window with the extension details. 
+- Last but not least, Click the install button (see the green rectangular) to install the extension
+<figure>
+<img src="images/vscode-extensions.png" width="100%" align="center"/></a>
+<figcaption> Figure 2 - Steps to install extension on VScode</figcaption>
+</figure>
+
+<br>
+
+**Note:** The Dev Containers extension is required to launch the dockerized environment. We will see later in this tutorial how to set and install the necessary extensions for your dockerized environment automatically with the `devcontainer.json` file.
+
+
 
 
 ## Summary
