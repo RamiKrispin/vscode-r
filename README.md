@@ -17,9 +17,9 @@ See also:
 
 ## Table of Content:
 
-* Motivation
-* Scope
-* Prerequisites
+* [Motivation](https://github.com/RamiKrispin/vscode-r#motivation)
+* [Scope](https://github.com/RamiKrispin/vscode-r#scope)
+* [Prerequisites](https://github.com/RamiKrispin/vscode-r#prerequisites)
 * General Architecture and Workflow
 * Getting Started with Docker
 * Running R on Docker - the Hard Way
@@ -208,6 +208,7 @@ __________________________
 
 If you are able to run the `whalesay` app you are ready to get started with Docker.
 
+## General Architecture and Workflow
 
 ## Summary
 
