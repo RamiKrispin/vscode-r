@@ -20,10 +20,10 @@ See also:
 * [Motivation](https://github.com/RamiKrispin/vscode-r#motivation)
 * [Scope](https://github.com/RamiKrispin/vscode-r#scope)
 * [Prerequisites](https://github.com/RamiKrispin/vscode-r#prerequisites)
-* General Architecture and Workflow
-* Getting Started with Docker
-* Running R on Docker - the Hard Way
-* Setting the Dev Containers Extension
+* [General Architecture and Workflow](https://github.com/RamiKrispin/vscode-r#general-architecture-and-workflow)
+* [Getting Started with Docker](https://github.com/RamiKrispin/vscode-r#getting-started-with-docker)
+* [Running R on Docker - the Hard Way](https://github.com/RamiKrispin/vscode-r#running-r-on-docker---the-hard-way)
+* [Setting the Dev Containers Extension](https://github.com/RamiKrispin/vscode-r#setting-the-dev-containers-extension)
 * Setting the R Environment
 * Setting Plots window
 * Setting Shiny
