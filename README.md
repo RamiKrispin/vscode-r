@@ -134,7 +134,7 @@ To install Docker Desktop, go to Docker website and follow the installation inst
 
 ### Docker Hub
 
-Container Registry has a similar functionality as Github for code, and it uses to store and share images. There are many container registries, and the most common is  Docker Hub. We will use throughout the tutorial Docker Hub to pull different images, such as Python built-in images. To register and create an account go to https://hub.docker.com and follow the registration instructions.
+Container Registry has a similar functionality as Github for code, and it uses to store and share images. There are many container registries, and the most common is  Docker Hub. We will use throughout the tutorial Docker Hub to pull different images, such as R and Python images or OS base images such as Ubuntu. To register and create an account go to https://hub.docker.com and follow the registration instructions.
 
 After installing Docker Desktop and setting account on Docker Hub, open Docker Desktop, and from the command line, login to Docker Hub:
 
@@ -210,7 +210,607 @@ If you are able to run the `whalesay` app you are ready to get started with Dock
 
 ## General Architecture and Workflow
 
+Before diving into the core functionality of Docker, let's review the generic development workflow architecture with Docker. Docker has similar functionality as Git and Github (or Gitlab, Bitbucket, etc.), enabling shifting your environment and settings (as opposed to code with Git) from one environment to another one (e.g., dev -> staging or dev -> prod) ensuring a high level of reproducibility. As a matter of fact those two (Docker and Git) go together side by side.
+
+
+### General architecture
+
+The diagram below describes a high-level architecture of a Dockerized development environment with VScode. It might be overwhelming if you have never used Docker before, and it will make more sense (I hope) by the end of this section.
+<figure>
+<img src="images/docker-architecture.png" width="100%" align="center"/></a>
+<figcaption> Figure 4 - Development workflow with VScode and Docker</figcaption>
+</figure>
+
+<br>
+
+
+This process includes the following components:
+- **Dev Container** - is the VScode extension that enables you to execute your local code inside a dockerized environment seamlessly. By default, it mounts your local folder to the docker environment ensuring your code runs inside the container and lives locally.
+- **devcontainer.json** - is the Dev Container configuration file that enables you to highly customize your VScode development environment when using the Dev Container extension. From settings the VScode options (e.g., fonts, list of extensions to install, etc.) to the Docker settings (similar to the docker-compose.yml file functionality)
+- **Dockerfile** - is the image manifest or recipe. It provides instructions for the docker engine about which base image to use and what components to install. Typically, you start the build process by importing some base image using the `FROM` command, which we will explain later in this tutorial. The Dev Container extension enables you to build the image on the fly when launching the environment using the Dockerfile or import a built-in image from some image registry such as Docker Hub.
+- **Image registry** - has similar functionality as Github / Gitlab / Bitbucket, and it is used to store public images (or private on some enterprise versions). The image registry lets you shift and distribute your images from one environment to another. In this tutorial, we will use the main image registry - Docker Hub. 
+- **Code registry** - beyond version control, it enables you to shift your code from one environment to another. In this tutorial, we will use Github as our code registry.
+
+**Note:** Regardless if you are using a private or public image registry, as a good practice, you should **NEVER** store passwords, credentials, or any sensitive information on your images. Rather, add environment variables or load information from a mounted volume during the image run time.
+
+### Development workflow
+Let's now organize and order this process to a general workflow. The below diagram defines a general order of operation for the development process applying the following steps:
+- **Install dependencies** - setting the prerequisites, including installing VScode and the required extensions (e.g., Dev Container, etc.), installing Docker, and setting a Docker Hub account (or equivalent)
+- **Set the Dockerfile** - this step is optional, if you wish to build your image on the fly. Alternatively, you can import a built-in image from an image registry and skip this step. In the next section, we will dive into more details about the core functionality of the Dockerfile and how to set it
+- **Set the devcontainer.json file** - this file defines the environment and enables you to customize both the VScode functionality and VScode settings. Later in this tutorial, we will see how to set this file
+- **Development** - once the `devcontainer.json` file is set, you can launch your dockerized development environment using the Dev Container extension on your local folder. 
+- **Testing** - this is a recommended intermediate step before shipping your code and environment to deployment. There are multiple approaches to code and environment testing, and the main goal is to ensure that your code sync with the dockerized environment and identify potential problems before deploying it.
+- **Deployment** - last but not least, using code and container registry (e.g., Github and Docker Hub), we can deploy our code using the same dockerized environment to some remote server (e.g., Github Actions, AWS, GCP, Azure, etc.) or have your peers run your code in their computer. 
+
+
+<figure>
+<img src="images/docker-workflow.png" width="100%" align="center"/></a>
+<figcaption> Figure 5 - Development with VScode and Docker workflow</figcaption>
+</figure>
+
+<br>
+
+In the next section, we review Docker basic commands and learn how to set a Dockerfile. 
+
+## Getting Started with Docker
+Generally, the VScode **Dev Container** extension lets you containerize your environment by importing a built-in image. However, often, you may want to add more layers (e.g., install additional dependencies) or build it yourself. This section focuses on the essential Docker requirements that will enable you to build your image and run it inside a container:
+
+- **Dockerfile** - the image recipe, allows you to add components and customize the dependencies according to the development environment requirements  
+- **Docker CLI** - core commands to build the image and run it as a containerized environment 
+
+<figure>
+<img src="images/dockerfile to container.png" width="100%" align="center"/></a>
+<figcaption> Figure 6 - Docker general workflow</figcaption>
+</figure>
+
+<br>
+
+**Note:** It is important to emphasize that this section covers the basic Docker requirements for this tutorial and is not an alternative to a full Docker tutorial or course. 
+
+
+### The Dockerfile
+The `Dockerfile` provides a set of instructions for the Docker engine about how to build the image. You can think about it as the image's recipe. It has its own unique and intuitive syntax using the following structure:
+
+``` Dockerfile
+COMMAND some instructions
+```
+
+For example, the following `Dockerfile` imports a built-in image with base R (version 3.10) from the [Rocker project](https://hub.docker.com/r/rocker/r-base) and then using the `apt-get update` and `apt-get install` to install the `curl` library :
+
+
+`./examples/ex-1/Dockerfile`
+``` Dockerfile
+FROM r-base:4.3.1
+
+LABEL example=1
+
+ENV R_VER=4.3.1
+
+RUN apt-get update && apt-get install -y --no-install-recommends curl
+```
+
+In a nutshell, we used the `FROM` command to specify the image we want to import from the Docker registry (don't forget to login to the Docker registry service you are using before building the image!). The `LABEL` command is used to set labels or comments, and the `ENV` command is to set environment variables. Last but not least, the `RUN` command is used to run a command on the command line, in this case, to install the `curl` library.
+
+Let's now review the Dockerfile core commands:
+- `FROM` - Defines the base image to use for the image's build. In most cases, unless you are building the image from scratch, you will use some base image with some pre-installed OS and some dependencies. For example, in this tutorial, we will import as our base image the official [Ubuntu image]()
+- `LABEL` - Enables to add information about the image to the image's metadata, such as authors, maintainers, license, etc.
+- `ENV` - Uses to set environment variables
+- `ARG` - Enables to set parameters during the build time
+- `RUN` -  Allows executing CLI commands (e.g., `pip install ...`, `apt-get ...`, `apt-install...`, `wget...`, etc.) during the build time to add additional components to the base image
+- `COPY` - Enables to copy objects (e.g., files and folders) from your local system to the image 
+- `WORKDIR` - Sets the working directory inside the image
+- `EXPOSE` - Defines the port number to expose the image during the run time
+- `CMD` - Sets a default command to execute during the run time of the image
+- `ENDPOINT` - Allows configuring a container that will run as an executable
+
+### Docker Build
+
+Once the `Dockerfile` is ready, the next step is to build the image using the  `docker build` command from the command line. For example, let's build the above `Dockerfile` using the `build` command from this repo root folder:
+
+``` shell
+docker build . -f ./examples/ex-1/Dockerfile -t rkrispin/vscode-r:ex1 
+```
+
+Here are the arguments we used with the `build` command:
+- The `-f` tag defines the `Dockerfile` path. This argument is optional and should be used if you are calling the `build` function from a different folder than one of the `Dockerfile`
+- The `.` symbol defines the context folder of the files system as the one of the `Dockerfile`. Although we did not use the file system in this case, this enables us in other cases to call and copy files from our local folder to the image during the build time
+- The `-t` is used to set the image's name and tag (e.g., version). In this case, the image name is `rkrispin/vscode-r` and the tag is `ex1`. 
+
+
+You should expect the following output:
+
+``` shell
+
+```
+
+**Note:** The above output of the build describes the different layers of the image. Don't worry if, at this point, it looks and sounds like gibberish. Reading this output type will be easier after reading the next section, which focuses on the image layers.
+
+
+You can use the `docker images` command to validate that the image was created successfully:
+
+``` shell
+>docker images
+
+```
+
+The next section will focus on the image layers and caching process.
+
+
+### The image layers
+
+The build process of Docker's images is based on layers. Depending on the context, the docker engine takes each one of the `Dockerfile` commands during the build time and translates it either into layer or metadata. `Dockerfile` commands, such as `FROM` and `RUN` are translated into a layer, and commands, such as `LABEL`, `ARG`, `ENV`, and `CMD` are translated into metadata. For example, we can observe in the output of the build of `rkrispin/vscode-python` image above that there are two layers:
+- The first layer started with `[1/2] FROM...`, corresponding to the `FROM python:3.10` line on the `Dockerfile`, which import the Python 3.10 official image
+- The second layer started with `[2/2] RUN apt-get...`, corresponding  to the `RUN` command on the `Dockerfile`
+
+
+**To update....**
+
+<figure>
+<img src="images/docker-layers.png" width="100%" align="center"/></a>
+<figcaption> Figure 7 - Example of a build output with respect to the Dockerfile</figcaption>
+</figure>
+
+<br>
+
+The `docker inspect` command returns the image metadata details in a JSON format. That includes the envrioment variables, labels, layers and general metadata. In the following example, we will us [jq](https://jqlang.github.io/jq/) to extract the layers information from the metadata JSON file:
+
+
+``` shell
+> docker inspect rkrispin/vscode-r:ex1 | jq '.[] | .
+
+```
+
+As you can see from the image's layers output above, the `rkrispin/vscode-r:ex1` image has nine layers. Each layer is represented by its hash key (e.g., `sha256:...`), and it is cached on the backend. While we saw on the build output that the docker engine triggered two processes from the `FROM` and `RUN` commands, we ended up with nine layers as opposed to two. The main reason for that is related to the fact that when importing the baseline image, we inherited the imported image characteristics, including the layers. In this case, we used the `FROM` to import the official `r-base` image, which included eight layers, and then added the 9th layer by executing the `RUN` commands. You can test it by pulling the baseline image and using the inspect command to review its layers:
+
+``` shell
+> docker pull r-base:4.3.1
+
+> docker inspect r-base:4.3.1 | jq '.[] | .RootFS'
+```
+
+### Layers caching
+
+One of the cons of Docker is the image build time. As the level of complexity of the Dockerfile is higher (e.g., a large number of dependencies), the longer the build time. Sometimes, your build won't execute as expected on the first try. Either some requirements are missing, or something breaks during the build time. This is where the use of caching helps in reducing the image rebuild time. Docker has smart mechanization that identifies if each layer should be built from scratch or can leverage a cached layer and save time. For example, let's add to the previous example another command to install the `vim` editor. Generally, we can (and should) add it to the same apt-get we are using to install the `curl` package, but for the purpose of showing the layers caching functionality, we will run it separately:
+
+
+`./examples/ex-2/Dockerfile`
+``` Dockerfile
+FROM r-base:4.3.1
+
+LABEL example=1
+
+ENV R_VER=4.3.1
+
+RUN apt-get update && apt-get install -y --no-install-recommends curl
+
+RUN apt-get update && apt-get install -y --no-install-recommends vim
+```
+
+
+We will use the below command to build this image and tag it as `rkrispin/vscode-r:ex2`:
+
+``` shell
+docker build . -f ./examples/ex-2/Dockerfile -t rkrispin/vscode-r:ex2 --progress=plain
+```
+You should expect the following output (if ran the previous build):
+
+``` shell
+
+```
+
+
+As can be noticed from the above build output, the first and second layers already exist from the previous build. Therefore, the docker engine adds their cached layers to the image (as opposed to building them from scratch), and just builds the 3rd layer and installs the vim editor.
+
+**Note:** By default, the build output is concise and short. You can get more detailed output during the build time by adding the `progress` argument and setting it to `plain`:
+
+``` shell
+> build . -f ./examples/ex-2/Dockerfile -t rkrispin/vscode-r:ex2 --progress=plain
+
+```
+
+Since we already cached the 3rd layer on the previous build, all the layers in the above output are cached, and the run time is less than 1 second.
+
+When setting your Dockerfile, you should be minded and strategic to the layers caching process. The order of the layers does matter! The following images demonstrate when the docker engine will use cached layers and when to rebuild them. The first image illustrates the initial build: 
+
+<figure>
+<img src="images/docker layers 1.png" width="100%" align="center"/></a>
+<figcaption> Figure 8 - Illustration of initial build of image. The left side represents the Dockerfile's commands and the right one the coorisponding layers</figcaption>
+</figure>
+
+<br>
+
+
+In this case, we have a Dockerfile with four commands that are translated during the build time into four layers. What will happen if we add a fifth command and place it right after the third one? The docker engine will identify that the first and second commands in the Dockerfile did not change and, therefore, will use the corresponding cached layers (one and two), and rebuild the rest of the layers from scratch:
+
+<figure>
+<img src="images/docker layers 2.png" width="100%" align="center"/></a>
+<figcaption> Figure 9 - Illustration of the caching process during the rebuild of an image</figcaption>
+</figure>
+
+<br>
+
+When planning your Dockerfile, if applicable,  a good practice is to place the commands that will most likely stay the same and keep new updates to the end of the file if possible.
+
+That was just the tip of the iceberg, and there is much more to learn about Docker. The next section will explore different methods to run Python inside a container.
+
+## Running R on Docker - the hard way
+
+In the previous sections, we saw how to define the image requirements with the `Dockerfile` and build it with the `build` command. This section focuses on running Python inside a container using the `docker run` command.
+
+### Docker run
+
+The `docker run` or `run` command enables us to create and run a new container from an image. Typically, the `run` command is used to launch a dockerized application or server or to execute a code following the below syntax:
+
+``` shell
+docker run [OPTIONS] IMAGE [COMMAND] [ARG...]
+```
+
+For example, we can use the `run` command with the official Python 3.10 image:
+
+``` shell
+docker run r-base:4.3.1
+```
+
+Surprisingly (or not), nothing happened. To understand that better, we need to go back to the `Dockerfile`. Generally, images can be used to run:
+- Server
+- Application
+
+In both cases, we use the `Dockerfile` to set and enable launching them during the run time. In the case of a server, we use on the `Dockerfile` the `PORT` and `CMD` commands to set the server's port on the image and launch the server, respectively. We then use the `run` command and add the `-p` (or `--publish list`) option to map the server's port with a local port. Similarly, to launch an application, we use the `CMD` command on the `Dockerfile` to define the launch command during the run time and use the `--interactive` and  `--tty` options to launch the container in interactive mode, which enables us to access the application.
+
+Let's now go back to the `python:3.10` image and use the `inspect` command to check if the `CMD` command was defined:
+
+
+``` shell
+> docker inspect python:3.10 | jq '.[] | .Config.Cmd'
+[
+  "python3"
+]
+```
+
+**Note:** We used the `jq` library again  to parse out from the JSON output the CMD metadata
+
+As you can see, the `CMD` on the `python:3.10` image is set to run the default Python launch command - `python3`, which launches Python during the run time. Let's now add the `--interactive` and  `--tty` options to run the container in an interactive mode:
+
+```shell
+ docker run --interactive --tty python:3.10 
+ ```
+This launches the default Python version on the image. We can then test it by using the `print` command to print `Hello World!`:
+
+```python
+Python 3.10.12 (main, Jun 14 2023, 18:40:54) [GCC 12.2.0] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>> print("Hello World!")
+Hello World!
+>>> 
+```
+
+OK, we have Python running inside a dockerized environment, so why should we not use it? Mainly due to the following reasons:
+- This is not a development environment, and it is harder (in my mind) to maintain and develop code from the terminal with respect to Python IDEs such as PyCharm or VScode. 
+- By default, the `docker run` is an ephemeral process, and therefore, your code is lost when you shut down the container.
+
+While there are ways to overcome the above issues, it is still convoluted and not as efficient as using VScode. In the next section, we will see how to set and run Python code with VScode and the Dev Containers extension.
+
+## Setting the Dev Containers Extension
+
+So far, we covered the foundation of Docker. We saw how to set and build an image with the `Dockerfile` and the `build` command, respectively, and then run it in a container with the `run` command. This section will focus on setting up a Python development environment with VScode and the [Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension.
+
+If you still need to install the Dev Containers extension or Docker Desktop, follow the installation instruction above. Once the extension is installed, you should expect to see on the far left side the extension status bar symbol (`><` alike):
+
+
+<figure>
+<img src="images/dev_container_symbol.png" width="20%" align="center"/></a>
+<figcaption> Figure 10 - The Dev Containers extension status bar symbol</figcaption>
+</figure>
+<br>
+
+### Setting the devcontainer.json file
+
+The Dev Containers extension enables to open a local folder inside a containerized environment. This solves the container ephemeral issue and enables you to maintain your code locally while developing and testing it inside a container.
+
+To set the Dev Containers extension on your local folder, create a folder named `.devcontainer` and add the `devcontainer.json` file. Generally, your project folder should follow the following structure:
+
+``` shell
+.
+├── .devcontainer
+│   └── devcontainer.json
+└── Your Projects Files
+``` 
+
+The `devcontainer.json` defines and customizes the container and VScode setting, such as:
+
+- Image settings - defines the image build method or if to pull an existing one 
+- Project settings such as extensions to install and command to execute during the launch time of the container
+
+
+
+Let's start with a practical example by setting the environment using the same image we build in the first example above (e.g., `rkrispin/vscode-python:ex1`). During the launch time of the environment, the Dev Containers extension follows the instractions in the `devcontainer.json` and sets the environment accordingly: 
+
+`.devcontainer/devcontainer.json`
+``` json
+{
+    "name": "Example 3",
+    "build":{
+        "dockerfile": "Dockerfile",
+        "context": "../"
+    }, 
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "quarto.quarto",
+                "ms-azuretools.vscode-docker",
+                "ms-python.python",
+                "ms-vscode-remote.remote-containers",
+                "yzhang.markdown-all-in-one",
+                "redhat.vscode-yaml",
+                "ms-toolsai.jupyter",
+                "hediet.vscode-drawio"
+            ]
+        }
+    }  
+}
+```
+
+**Note:** The `devcontainer.json` file must be stored under the `.devcontainer` folder or in the project root folder. To run the above example, you will have to open the `./examples/exp-3` folder in VScode as the project folder using the `File` -> `Open Folder...` options. 
+
+As can see in the above `devcontainer.json`, the `build` section defines the image build process. The `dockerfile` argument points out to the `Dockerfile` to use for the build. The `context` argument defines the files' system path for the `Dockerfile`. Although, we currently do not use the `context` argument in the build time, we will see its applications later. In addition, the `customizations` section enables you to customize the VScode options, such as extensions to install, default Python interpreter, and files to execute during the container launch.
+
+### Launching the folder inside a container
+
+Once you set the `devcontainer.json`, to launch the folder inside the container, go to the bottom far left side of your VScode screen and click the Dev Containers' status bar ()`><` symbol alike). This will open the VScode Command Palette on the top of the screen, and you should see the Dev Containers extension's common commands. Select the `Reopen in Container` options (see the screenshot below):
+
+<figure>
+<img src="images/command-palette.png" width="100%" align="center"/></a>
+<figcaption> Figure 11 - the Dev Containers extensions Command Palette </figcaption>
+</figure>
+
+<br>
+
+The below video demonstrates the full process of launching the Python environment inside a container with the Dev Containers extension:
+
+
+<figure>
+<img src="images/open_dev_container.gif" width="100%" align="center"/></a>
+<figcaption> Figure 12 - Open a folder inside a container with the Dev Containers extension</figcaption>
+</figure>
+
+<br/>
+
+The next section focuses on customizing the Python environment.
+
+## Setting the Python Environment
+
+In this section, we will connect all the dots together and build a Python development environment using the following architecture:
+- We will start by setting the image using the following files:
+  - Create a `Dockerfile` to define the environment settings (e.g., Python version, packages to install, etc.). In addition, we will use the following helper files:
+    - I like to keep the `Dockerfile` as concise as possible by using a helper bash script (`install_dependencies.sh`) to install all the environment dependencies, such as Debian packages, installing and setting the Python environment with Conda (or a similar solution), etc. 
+    - In addition, we will use the `requirements.txt` file to define the list of Python packages to install in the environment
+  - The next step is to set up the Dev Containers extension:
+    - We will use the `devcontainer.json` file to define the VScode settings for the development environment. That includes the build method, a list of extensions to set, local volumes to mount, and defining environment variables, etc.
+    - In addition, we will use the `devcontainer.env` file to set additional environment variables. Note that those variables neither be available during the build time nor can be called by `devcontainer.json` file
+
+
+The `.devcontainer` folder should have the following files:
+
+```shell
+.
+├── Dockerfile
+├── devcontainer.env
+├── devcontainer.json
+├── install_dependencies.sh
+└── requirements.txt
+```
+
+
+Just before getting started, let's define our environment requirments:
+- Python version 3.10
+- Install the following packages:
+  - pandas v2.0.3
+  - plotly v5.15.0
+- Conda for setting the virtual environment
+- Install the following extensions:
+  - Docker support
+  - Python language support
+  - Markdown editor
+  - Quarto editor
+  - YAML language support 
+  - Jupyter notebook support
+- Last but not least, we would like to mount a local folder that is not the project folder to load CSV files
+
+In addition, to make this setting as customized as possible, we will set locally environment variables that will enable us to modify our settings, if needed. That includes the following variables:
+- `ENV_NAME` - we will use this variable to set the Conda environment name and to set the path to the default Python interpreter
+- `PYTHON_VER` - set the Python version for the conda environment
+- `CSV_PATH` - the local path for a folder with CSV files
+- `MY_VAR` - A general variable that we will use as example for setting environment variables
+
+On Mac and Linux you can use the `.zshrc` file to set those variables:
+
+~/.zshrc  
+```
+# Setting env variables for VScode
+export ENV_NAME=python_tutorial
+export PYTHON_VER=3.10
+export CSV_PATH=$HOME/Desktop/CSV
+export MY_VAR=some_var
+```
+
+For Windows users, you can use the `setx` command to the environment vairables:
+```
+setx variable_name "variable_value"
+```
+
+**Note:** VScode caches environment variables during the launch time. Therefore, when adding new environment variables during an open session, they won't be available until completely closing VScode and reopening it.
+
+
+### Setting the image
+
+We will use the below `Dockerfile` to build our Python environment:
+
+`.devcontainer/Dockerfile`
+``` Dockerfile
+FROM python:3.10
+
+# Arguments
+ARG PYTHON_VER
+ARG ENV_NAME
+
+# Environment variables
+ENV ENV_NAME=$ENV_NAME
+ENV PYTHON_VER=$PYTHON_VER
+
+# Copy files
+RUN mkdir requirements
+COPY requirements.txt requirements/
+COPY install_dependencies.sh requirements/
+
+# Install dependencies
+RUN bash requirements/install_dependencies.sh $ENV_NAME $PYTHON_VER
+
+```
+
+To keep the build time fairly short, we use the Python official image as our base image for our environment. The main advantage of using this base image type is that it comes with most of the required dependencies and saves us time (and pain). 
+
+Using arguments enables us to parameterize our environment settings. In this case, the user can modify the Python version and environment name using the `PYTHON_VER` and `ENV_NAME` arguments. I then set those arguments as environment variables for convenience (staying available after the build).
+
+Last but not least, we create a local folder (`requirements`) inside the image and copy files from our local drive based on the path that was defined by the context argument on the `devcontainer.json` file. The `install_dependencies.sh` is a bash helper script that installs dependencies (conda, vim, etc.), sets the conda environment, and installs Python packages using the list in the `requirements.txt` file.
+
+
+While we set the Python environment with conda, you can modify the script below to other alternatives such as `venv`, and `Poetry` in the below script:
+
+`.devcontainer/install_dependencies.sh`
+``` bash
+#!/bin/bash
+
+CONDA_ENV=$1
+PYTHON_VER=$2
+CPU=$(uname -m)
+
+
+# Installing prerequisites
+apt-get update && \
+    apt-get install -y \
+    python3-launchpadlib \
+    vim \
+    && apt update 
+
+
+# Install miniconda
+apt update && apt-get install -y --no-install-recommends \
+    software-properties-common \
+    && add-apt-repository -y ppa:deadsnakes/ppa \
+    && apt update 
+
+wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-${CPU}.sh -O ~/miniconda.sh \
+    && /bin/bash ~/miniconda.sh -b -p /opt/conda \
+    && export PATH=/opt/conda/bin:$PATH \
+    && conda init bash \
+    && conda install conda-build
+
+# Set environment
+. /root/.bashrc \
+    && conda create -y --name $CONDA_ENV python=$PYTHON_VER 
+
+echo "conda activate $CONDA_ENV" >> ~/.bashrc
+
+conda activate $CONDA_ENV
+
+# Install the Python packages
+pip3 install -r requirements/requirements.txt
+
+```
+
+**Note:** We use the `uname -m` CLI command to extract the CPU architecture (e.g., Intel, M1/2, etc.) and choose the conda's build accordingly.
+
+We will set the required packages for the Python environment with the `requirements.txt` file: 
+
+`.devcontainer/requirements.txt`
+```txt
+wheel==0.40.0
+pandas==2.0.3
+plotly==5.15.0
+plotly-express==0.4.1
+```
+
+### Setting the devcontainer.json file
+
+Once we set the image, the next step is setting the `devcontainer.json` file. We incorporated environment variables in the below settings to enable the seamless creation of multiple environments:
+
+
+`.devcontainer/devcontainer.json`
+
+```json
+{
+    "name": "${localEnv:ENV_NAME}",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "args": {"ENV_NAME": "${localEnv:ENV_NAME}",
+                 "PYTHON_VER": "${localEnv:PYTHON_VER}"}, 
+        "context": "."
+    },
+    "customizations": {
+        "settings": {
+            "python.defaultInterpreterPath": "/opt/conda/envs/${localEnv:ENV_NAME}/bin/python"
+        },
+        "vscode": {
+            "extensions": [
+                "quarto.quarto",
+                "ms-azuretools.vscode-docker",
+                "ms-python.python",
+                "ms-vscode-remote.remote-containers",
+                "yzhang.markdown-all-in-one",
+                "redhat.vscode-yaml",
+                "ms-toolsai.jupyter"
+            ]
+        }
+    },
+
+    "mounts": [
+            "source=${localEnv:CSV_PATH},target=/home/csv,type=bind,consistency=cache"
+    ],
+    "remoteEnv": {
+        "MY_VAR": "${localEnv:MY_VAR}"
+    },
+    "runArgs": ["--env-file",".devcontainer/devcontainer.env"],
+    "postCreateCommand": "python3 tests/test1.py"
+}
+```
+
+For the build, we use the `dockerfile`, `args`, and `context` to define the Dockerfile, arguments (e.g., Python version and environment name), and folder contest during the build, respectively.
+
+We use the `python.defaultInterpreterPath` argument to set the path of the default Python interpreter to the conda environment we set during the build.
+
+With the `mounts` argument, we mount a local folder (outside the current folder) with a path inside the container (e.g., `home/csv`). Generally, you would use this option when you wish to load a file or data from a folder outside your working folder or make the separation between your data and code. In this case, the `CSV_PATH` environment variable defines the path of the local folder.
+
+The `remoteEnv` enables to set environment variables with the container. Alternatively, you can add a `.env` file with a list of environment variables using the `runArgs` argument.
+
+The `postCreateCommand` argument allows for the execution of commands after the build process has finished. In this case, we utilize it to run a basic test script that checks if the packages can be loaded and prints out the message `Hello World!`:
+
+`tests/test1.py`
+```python
+import pandas as pd
+import plotly as py
+import plotly.express as px
+
+print("Hello World!")
+```
+
+ That's it! We are ready to launch the environment with the Dev Containers extension:
+
+
+<figure>
+<img src="images/open_dev_container2.gif" width="100%" align="center"/></a>
+<figcaption> Figure 13 - Launch the Python Environment with the Dev Containers extension</figcaption>
+</figure>
+
+<br/>
+
+
 ## Summary
+
+This tutorial covered the foundation of setting a dockerized development environment for Python with VScode and Docker. We reviewed the process of setting up a Python environment using the Dev Containers extension. While this tutorial does not focus on Docker, it covers the foundation of Docker with the goal of reducing the entry barrier for new users. In addition, we saw how to set up and launch a containerized Python development environment with the Dev Containers extension. 
+
+Using environment variables enables us to parametized the environment and seamlessly modify and costimize it. The example above uses conda to set the Python environment but you can choose any other method that works best for your needs.
+
+Last but not least, all feedback is welcome! Please feel free to open an issue if you have any feedback about the tutorial or found some code issues.
 
 ## Resources
 
