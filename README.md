@@ -21,6 +21,7 @@ See also:
 * [Scope](https://github.com/RamiKrispin/vscode-r#scope)
 * [Prerequisites](https://github.com/RamiKrispin/vscode-r#prerequisites)
 * [General Architecture and Workflow](https://github.com/RamiKrispin/vscode-r#general-architecture-and-workflow)
+* [The Rocker Project](https://github.com/RamiKrispin/vscode-r#the-rocker-project)
 * [Getting Started with Docker](https://github.com/RamiKrispin/vscode-r#getting-started-with-docker)
 * [Running R on Docker - the Hard Way](https://github.com/RamiKrispin/vscode-r#running-r-on-docker---the-hard-way)
 * [Setting the Dev Containers Extension](https://github.com/RamiKrispin/vscode-r#setting-the-dev-containers-extension)
@@ -249,6 +250,23 @@ Let's now organize and order this process to a general workflow. The below diagr
 </figure>
 
 <br>
+
+
+## The Rocker Project
+
+The [Rocker project](https://rocker-project.org/) is the main hub for built-in R images. The project was created by Carl Boettiger and Dirk Eddelbuettel, and is now maintained by Carl, Dirk, Noam Ross, and SHIMA Tatsuya. The project provides a variety of R images, such as:
+- [Base R](https://hub.docker.com/_/r-base) - a basic image with R installed. There is a corresponding image to most of the recent R versions
+- [RStudio Server](https://hub.docker.com/r/rocker/rstudio/tags) - a built-in image with RStudio server installed
+- Different R package settings - built-in images with different ecosystems installed, such as the [tidyverse](https://hub.docker.com/r/rocker/tidyverse), [verse](https://hub.docker.com/r/rocker/verse), [geospatial](https://hub.docker.com/r/rocker/geospatial), [Shiny](https://hub.docker.com/r/rocker/shiny), [Shiny with tidyverse](https://hub.docker.com/r/rocker/shiny-verse/tags), etc.
+https://hub.docker.com/r/rocker/shiny-verse/tags
+
+The main advantages of using images from the Rocker project as base images are:
+- Robust and tested
+- Community support
+- Comes with R's core dependencies (Debian packages, etc.) 
+
+
+We will use in this tutorial some images from the Rocker project as our baseline image.
 
 In the next section, we review Docker basic commands and learn how to set a Dockerfile. 
 
