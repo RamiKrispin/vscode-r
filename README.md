@@ -642,28 +642,34 @@ docker run [OPTIONS] IMAGE [COMMAND] [ARG...]
 For example, we can use the `run` command with the base R image:
 
 ``` shell
-docker run r-base:4.3.1
+>docker run r-base:4.3.1
 ```
 
-Surprisingly (or not), nothing happened. To understand that better, we need to go back to the `Dockerfile`. Generally, images can be used to run:
-- Server
-- Application
+This will return the following error message:
 
-In both cases, we use the `Dockerfile` to set and enable launching them during the run time. In the case of a server, we use on the `Dockerfile` the `PORT` and `CMD` commands to set the server's port on the image and launch the server, respectively. We then use the `run` command and add the `-p` (or `--publish list`) option to map the server's port with a local port. Similarly, to launch an application, we use the `CMD` command on the `Dockerfile` to define the launch command during the run time and use the `--interactive` and  `--tty` options to launch the container in interactive mode, which enables us to access the application.
+```shell
+Fatal error: you must specify '--save', '--no-save' or '--vanilla'
+```
 
-Let's now go back to the `r-base:4.3.1` image and use the `inspect` command to check if the `CMD` command was defined:
+What just happened over here? To understand better, we should go back to the image metadata, and review the `CMD` command of the image. As you remamber, the `CMD` command sets a default command to execute during the run time of the image. We will run again the `inspect` command and use `jq` to extract the `CMD` settings:
 
-
-``` shell
+```shell
 > docker inspect r-base:4.3.1  | jq '.[] | .Config.Cmd'   
 [
   "R"
 ]
 ```
 
-**Note:** We used the `jq` library again  to parse out from the JSON output the CMD metadata
+This means that during runtime, the R command is executed on the command line, launching R. However, the session will exit unless exposed in a server and the port is opened. If you are familiar with R, when quitting a session, it popups the following questions regarding the session:
 
-As you can see, the `CMD` on the `r-base:4.3.1` image is set to run the default R launch command - `R`, which launches R during the run time. Let's now add the `--interactive` and  `--tty` options to run the container in an interactive mode:
+```R
+> q()
+Save workspace image? [y/n/c]: 
+```
+Since the image `CMD` argument does not define how to handle the end of session (e.g., `R --vanilla`), when `docker run` exiting the session it trigger the above error. 
+
+
+Alternatively, we can use the interactive and tty arguments to keep the session persist during the run time.Let's now add the `--interactive` and  `--tty` options to run the container in an interactive mode:
 
 ```shell
  docker run --interactive --tty r-base:4.3.1
@@ -693,6 +699,51 @@ Type 'q()' to quit R.
 [1] "Hello World"
 > 
 ```
+
+
+In summary, the docker run command creates and runs a new container from an image. It enables running code and applications, or launching a server inside a container. The output is depenend on the Dockerfile settings. As we saw in the above example, you open and run R inside a containerized environment using an interactive mode.
+
+OK, we have R running inside a dockerized environment, so why should we not use it? Mainly due to the following reasons:
+- This is not a development environment, and it is harder (in my mind) to maintain and develop code from the terminal with respect to R IDEs such as RStudio or VScode. 
+- By default, the `docker run` is an ephemeral process, and therefore, your code is lost when you shut down the container.
+
+
+While there are ways to overcome the above issues, it is still convoluted and not as efficient as using VScode. In the next section, we will see how to set and run R code with VScode and the Dev Containers extension.
+
+## Setting the Dev Containers Extension
+
+So far, we covered the foundation of Docker. We saw how to set and build an image with the `Dockerfile` and the `build` command, respectively, and then run it in a container with the `run` command. This section will focus on setting up a Python development environment with VScode and the [Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension.
+
+If you still need to install the Dev Containers extension or Docker Desktop, follow the installation instruction above. Once the extension is installed, you should expect to see on the far left side the extension status bar symbol (`><` alike):
+
+
+<figure>
+<img src="images/dev_container_symbol.png" width="20%" align="center"/></a>
+<figcaption> Figure 10 - The Dev Containers extension status bar symbol</figcaption>
+</figure>
+<br>
+
+### Setting the devcontainer.json file
+
+The Dev Containers extension enables to open a local folder inside a containerized environment. This solves the container ephemeral issue and enables you to maintain your code locally while developing and testing it inside a container.
+
+To set the Dev Containers extension on your local folder, create a folder named `.devcontainer` and add the `devcontainer.json` file. In addition, we will use the `settings.json` file under the `.vscode` folder to customize the VScode settings. Generally, your project folder should follow the following structure:
+
+``` shell
+.
+├── .devcontainer
+│   └── devcontainer.json
+├── .vscode
+│   └── settings.json
+└── Your Projects Files
+``` 
+
+The `devcontainer.json` defines and customizes the container and VScode setting, such as:
+
+- Image settings - defines the image build method or if to pull an existing one 
+- Project settings such as extensions to install and command to execute during the launch time of the container
+
+
 
 ## Resources
 
