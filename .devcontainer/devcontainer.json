@@ -1,7 +1,7 @@
 {
     "name": "R Dev Environment",
     "build":{
-        "dockerfile": "../examples/ex-1/Dockerfile",
+        "dockerfile": "Dockerfile.dev",
         "context": ".",
         "args" : {
             "PROJECT_NAME": "PROJECT_NAME",
@@ -20,21 +20,21 @@
     "customizations": {
         "vscode": {
             "extensions": [
-                # R Extensions
+                // R Extensions
                 "rdebugger.r-debugger",
                 "reditorsupport.r",
                 "REditorSupport.r",
                 "REditorSupport.r-lsp", 
                 "RDebugger.r-debugger",
-                # Documentation Extensions
+                // Documentation Extensions
                 "quarto.quarto",
                 "purocean.drawio-preview",
                 "redhat.vscode-yaml",
                 "yzhang.markdown-all-in-one",
-                # Docker Supporting Extensions
+                // Docker Supporting Extensions
                 "ms-azuretools.vscode-docker",
                 "ms-vscode-remote.remote-containers",
-                # Python Extensions
+                // Python Extensions
                 "ms-python.python",
                 "ms-toolsai.jupyter"
             ]

@@ -266,7 +266,11 @@ The main advantages of using images from the Rocker project as base images are:
 - Comes with R's core dependencies (Debian packages, etc.) 
 
 
-We will use in this tutorial some images from the Rocker project as our baseline image.
+As mentioned above, you can run RStudio inside a container using a containerized RStudio Server. The Rocker project provides a built-in and ready to use images with RStduio Server. While it is not in the scope of this tutorial, it is a good alternative for VScode with the following limitations:
+- It is under an AGPL-3 license and therefore, cannot be used for enterprise
+- Required some additional modifications and settings (e.g., mount local folders, git, etc.)
+
+In this tutorial we will leverage some images from the Rocker project (base R, etc.) as our baseline images.
 
 In the next section, we review Docker basic commands and learn how to set a Dockerfile. 
 
@@ -293,7 +297,7 @@ The `Dockerfile` provides a set of instructions for the Docker engine about how 
 COMMAND some instructions
 ```
 
-For example, the following `Dockerfile` imports a built-in image with base R (version 3.10) from the [Rocker project](https://hub.docker.com/r/rocker/r-base) and then using the `apt-get update` and `apt-get install` to install the `curl` library :
+For example, the following `Dockerfile` imports a built-in image with base R (version 4.3.1) from the [Rocker project](https://hub.docker.com/r/rocker/r-base) and then using the `apt-get update` and `apt-get install` to install the `curl` library :
 
 
 `./examples/ex-1/Dockerfile`
@@ -338,7 +342,34 @@ Here are the arguments we used with the `build` command:
 You should expect the following output:
 
 ``` shell
-
+[+] Building 126.2s (6/6) FINISHED                                                                                                                                                         
+ => [internal] load build definition from Dockerfile                                                                                                                                  0.2s
+ => => transferring dockerfile: 197B                                                                                                                                                  0.0s
+ => [internal] load .dockerignore                                                                                                                                                     0.2s
+ => => transferring context: 2B                                                                                                                                                       0.0s
+ => [internal] load metadata for docker.io/library/r-base:4.3.1                                                                                                                       1.6s
+ => [1/2] FROM docker.io/library/r-base:4.3.1@sha256:fc60b05cb7cdd028290531cfedc86ca4abc2e6549c6b94a72ac375f0ed80f57d                                                               111.4s
+ => => resolve docker.io/library/r-base:4.3.1@sha256:fc60b05cb7cdd028290531cfedc86ca4abc2e6549c6b94a72ac375f0ed80f57d                                                                 0.1s
+ => => sha256:595a7cb5564e9f57ad854e5cf01226e09c5a24e9f6ba5161959c830a4890c5ad 1.58kB / 1.58kB                                                                                        0.0s
+ => => sha256:c80309e0a5bbe8e3c8000103b383c6a60c58a6a84681e6aa5963d565eebe59a6 49.40MB / 49.40MB                                                                                     32.7s
+ => => sha256:e6cbeb6beab250969d7a012bc457340f9616f734a70d5b3528c9ea0836cff737 3.36kB / 3.36kB                                                                                        0.5s
+ => => sha256:fc60b05cb7cdd028290531cfedc86ca4abc2e6549c6b94a72ac375f0ed80f57d 979B / 979B                                                                                            0.0s
+ => => sha256:ad8ea1d6d7b698747b90d75600aabd31d4c4a4738cfd5e5787ac6fa4823f1fd7 5.59kB / 5.59kB                                                                                        0.0s
+ => => sha256:9f7d63b8619e463d865c0fe84818c1100294ce19cc17e3a9c6c1afc141a949ba 25.33MB / 25.33MB                                                                                     17.3s
+ => => sha256:06d49c39ba288dc715fe7c732b83772de2a8362469d2de2984182ff219a2bbdd 866.32kB / 866.32kB                                                                                    2.0s
+ => => sha256:7cba2360fd37c6a0a4e49af374129c5d2c04fa6dc57617dd4ff8d379a001e37d 348B / 348B                                                                                            2.3s
+ => => sha256:5b9c9354c3386447ea1123b43a83ec67cfc7dde48b7ba1300f678a4172e800f2 249.74MB / 249.74MB                                                                                  108.0s
+ => => extracting sha256:c80309e0a5bbe8e3c8000103b383c6a60c58a6a84681e6aa5963d565eebe59a6                                                                                             0.6s
+ => => extracting sha256:e6cbeb6beab250969d7a012bc457340f9616f734a70d5b3528c9ea0836cff737                                                                                             0.0s
+ => => extracting sha256:9f7d63b8619e463d865c0fe84818c1100294ce19cc17e3a9c6c1afc141a949ba                                                                                             0.2s
+ => => extracting sha256:06d49c39ba288dc715fe7c732b83772de2a8362469d2de2984182ff219a2bbdd                                                                                             0.0s
+ => => extracting sha256:7cba2360fd37c6a0a4e49af374129c5d2c04fa6dc57617dd4ff8d379a001e37d                                                                                             0.0s
+ => => extracting sha256:5b9c9354c3386447ea1123b43a83ec67cfc7dde48b7ba1300f678a4172e800f2                                                                                             2.4s
+ => [2/2] RUN apt-get update && apt-get install -y --no-install-recommends curl                                                                                                      12.7s
+ => exporting to image                                                                                                                                                                0.2s
+ => => exporting layers                                                                                                                                                               0.2s
+ => => writing image sha256:9fe034e5720bea16688cc897198533a3421b0727c40d096f797edadcb4e29fdf                                                                                          0.0s
+ => => naming to docker.io/rkrispin/vscode-r:ex1   
 ```
 
 **Note:** The above output of the build describes the different layers of the image. Don't worry if, at this point, it looks and sounds like gibberish. Reading this output type will be easier after reading the next section, which focuses on the image layers.
@@ -348,7 +379,8 @@ You can use the `docker images` command to validate that the image was created s
 
 ``` shell
 >docker images
-
+REPOSITORY                                                                      TAG            IMAGE ID       CREATED         SIZE
+rkrispin/vscode-r                                                               ex1            9fe034e5720b   4 minutes ago   834MB
 ```
 
 The next section will focus on the image layers and caching process.
@@ -356,12 +388,13 @@ The next section will focus on the image layers and caching process.
 
 ### The image layers
 
-The build process of Docker's images is based on layers. Depending on the context, the docker engine takes each one of the `Dockerfile` commands during the build time and translates it either into layer or metadata. `Dockerfile` commands, such as `FROM` and `RUN` are translated into a layer, and commands, such as `LABEL`, `ARG`, `ENV`, and `CMD` are translated into metadata. For example, we can observe in the output of the build of `rkrispin/vscode-python` image above that there are two layers:
-- The first layer started with `[1/2] FROM...`, corresponding to the `FROM python:3.10` line on the `Dockerfile`, which import the Python 3.10 official image
+Docker builds images using a layers approach. Depending on the context, the docker engine takes each of the `Dockerfile` commands during the build time and translates it into layer or metadata. `Dockerfile` commands, such as `FROM` and `RUN`, create layers, and commands, such as `LABEL`, `ARG`, `ENV`, and `CMD`, create metadata. For example, we can observe in the output of the build of `rkrispin/vscode-r:ex1` image above that there are two layers:
+
+- The first layer started with `[1/2] FROM...`, corresponding to the `FROM r-base:4.3.1` line on the `Dockerfile`, which import the base-R image from the Rocker project
 - The second layer started with `[2/2] RUN apt-get...`, corresponding  to the `RUN` command on the `Dockerfile`
 
 
-**To update....**
+# To update....
 
 <figure>
 <img src="images/docker-layers.png" width="100%" align="center"/></a>
@@ -372,6 +405,8 @@ The build process of Docker's images is based on layers. Depending on the contex
 
 The `docker inspect` command returns the image metadata details in a JSON format. That includes the envrioment variables, labels, layers and general metadata. In the following example, we will us [jq](https://jqlang.github.io/jq/) to extract the layers information from the metadata JSON file:
 
+
+# Update...
 
 ``` shell
 > docker inspect rkrispin/vscode-r:ex1 | jq '.[] | .
@@ -410,6 +445,8 @@ We will use the below command to build this image and tag it as `rkrispin/vscode
 ``` shell
 docker build . -f ./examples/ex-2/Dockerfile -t rkrispin/vscode-r:ex2 --progress=plain
 ```
+
+# ???
 You should expect the following output (if ran the previous build):
 
 ``` shell
