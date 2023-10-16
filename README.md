@@ -651,7 +651,7 @@ This will return the following error message:
 Fatal error: you must specify '--save', '--no-save' or '--vanilla'
 ```
 
-What just happened over here? To understand better, we should go back to the image metadata, and review the `CMD` command of the image. As you remamber, the `CMD` command sets a default command to execute during the run time of the image. We will run again the `inspect` command and use `jq` to extract the `CMD` settings:
+What just happened over here? To understand better, we should go back to the image metadata and review the `CMD` command of the image. As you remember, the `CMD` command sets a default command to execute during the run time of the image. We will run the `inspect` command again and use `jq` to extract the `CMD` settings:
 
 ```shell
 > docker inspect r-base:4.3.1  | jq '.[] | .Config.Cmd'   
@@ -666,10 +666,10 @@ This means that during runtime, the R command is executed on the command line, l
 > q()
 Save workspace image? [y/n/c]: 
 ```
-Since the image `CMD` argument does not define how to handle the end of session (e.g., `R --vanilla`), when `docker run` exiting the session it trigger the above error. 
 
+Since the image `CMD` argument does not define how to handle the end of the session (e.g., `R --vanilla`), `docker run` when exiting the session triggers the above error.
 
-Alternatively, we can use the interactive and tty arguments to keep the session persist during the run time.Let's now add the `--interactive` and  `--tty` options to run the container in an interactive mode:
+Alternatively, we can use the interactive and tty arguments to keep the session persist during the run time. Let's now add the `--interactive` and  `--tty` options to run the container in an interactive mode:
 
 ```shell
  docker run --interactive --tty r-base:4.3.1
@@ -710,38 +710,371 @@ OK, we have R running inside a dockerized environment, so why should we not use 
 
 While there are ways to overcome the above issues, it is still convoluted and not as efficient as using VScode. In the next section, we will see how to set and run R code with VScode and the Dev Containers extension.
 
-## Setting the Dev Containers Extension
+## Setting R Development Environment with VScode
 
-So far, we covered the foundation of Docker. We saw how to set and build an image with the `Dockerfile` and the `build` command, respectively, and then run it in a container with the `run` command. This section will focus on setting up a Python development environment with VScode and the [Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension.
+So far, we reviewed the foundation of Docker. We saw how to set and build an image with the `Dockerfile` and the `build` command, respectively, and then run it in a container with the `run` command. This section will focus on setting up an R development environment with VScode. This includes the following steps:
+- Set a `Dockerfile` with the R environment settings
+- Define the [Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension settings
 
-If you still need to install the Dev Containers extension or Docker Desktop, follow the installation instruction above. Once the extension is installed, you should expect to see on the far left side the extension status bar symbol (`><` alike):
+### General Requirements
+
+Before we start setting up our R development environment, let's define the scope:
+- R version 4.3.1
+- R core packages (e.g., `dplyr`, `ggplot2`, `plotly`, `shiny`)
+- Quarto version `1.3.450`
+- Support interactive R applications such as Shiny app, htmlwidget, etc.
+- Plot viewers
+- Tables viewer
+- Help viewer
+
+In addition, we will use [radian](https://github.com/randy3k/radian) to run R on the command line. Radian is an alternative R console with code completion and syntax highlight features.
+
+Last but not least, we will build the image to enable us to update, modify, and add new components seamlessly.
+
+### Image Build Approach
+
+One of the main components of a dockerized environment is the image. Here are the main options for setting image with R environment from simple to complex:
+- Pull a built-in and ready-to-use image from an external source such as the ones available on the Rocker project. 
+- Pull a built-in image but add additional layers (e.g., required packages, etc.)
+- Build the image (almost) from scratch
+
+Generally, I recommend using a robust and well-tested image as your baseline when applicable. This will save you or reduce the build time and potential debugging or handling dependencies issues. The Docker Hub is a good place to look for such images, and in the context of R, Rocker is the first place to check. We will go with the last option for learning purposes and build the R environment (almost) from scratch.
+
+What does it mean to build an image from scratch? it means that the starting point would be a clean and minimal Ubuntu image, which comes without the core R dependencies such C, C++, and Fortran compilers. In addition, we will have to set and define R's core configuration options, which, by default, in a regular OS such as Windows or macOS, you won't have to set or define.
+
+To make this process seamless and easy to update and modify if needed, we will use:
+- Environment variables to define the core properties of the R environment, such as R and Quarto version, default CRAN mirror, etc.
+- A JSON file with a list of required packages and their versions
+
+This will enable, down the road, to update the environment just by updating the environment variables and the JSON file.
+
+### The Dockerfile
+
+Below is the `Dockerfile` we will use to set the R environment:
+
+`./.devcontainer/Dockerfile.dev`
+```Dockerfile
+# Setting an R environment from scratch 
+# Step 1 - Import base image
+FROM ubuntu:22.04
+
+# Step 2 - Set arguments and environment variables
+# Define arguments
+ARG PROJECT_NAME=PROJECT_NAME
+ARG VENV_NAME=VENV_NAME
+ARG R_VERSION_MAJOR=4
+ARG R_VERSION_MINOR=3
+ARG R_VERSION_PATCH=1
+ARG DEBIAN_FRONTEND=noninteractive
+ARG CRAN_MIRROR=https://cran.rstudio.com/
+ARG QUARTO_VER="1.3.450"
+
+# Define environment variables
+ENV PROJECT_NAME=$PROJECT_NAME
+ENV VENV_NAME=$VENV_NAME
+ENV R_VERSION_MAJOR=$R_VERSION_MAJOR
+ENV R_VERSION_MINOR=$R_VERSION_MINOR
+ENV R_VERSION_PATCH=$R_VERSION_PATCH
+ENV QUARTO_VER=$QUARTO_VER
+ENV CONFIGURE_OPTIONS="--with-cairo --with-jpeglib --enable-R-shlib --with-blas --with-lapack"
+ENV TZ=UTC
+ENV CRAN_MIRROR=$CRAN_MIRROR
+
+# Step 3 - Install R dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    apt-utils\
+    gfortran \
+    git \
+    g++ \
+    libreadline-dev \
+    libx11-dev \
+    libxt-dev \
+    libpng-dev \
+    libjpeg-dev \
+    libcairo2-dev \
+    libcurl4-openssl-dev \
+    libssl-dev \
+    libxml2-dev \
+    libudunits2-dev \
+    libgdal-dev \
+    libbz2-dev \
+    libzstd-dev \
+    liblzma-dev \
+    libpcre2-dev \
+    locales \
+    openjdk-8-jdk \
+    screen \
+    texinfo \
+    texlive \
+    texlive-fonts-extra \
+    vim \
+    wget \
+    xvfb \
+    tzdata \
+    sudo\
+    jq\
+    curl\
+    libgit2-dev \
+    libmagick++-dev \
+    make \
+    tmux \
+    python3-launchpadlib \
+    python3.10-dev \
+    python3.10-venv \
+    python3-pip \
+&& rm -rf /var/lib/apt/lists/*
+
+# Step 4 - Install R
+RUN wget https://cran.rstudio.com/src/base/R-${R_VERSION_MAJOR}/R-${R_VERSION_MAJOR}.${R_VERSION_MINOR}.${R_VERSION_PATCH}.tar.gz && \
+    tar zxvf R-${R_VERSION_MAJOR}.${R_VERSION_MINOR}.${R_VERSION_PATCH}.tar.gz && \
+    rm R-${R_VERSION_MAJOR}.${R_VERSION_MINOR}.${R_VERSION_PATCH}.tar.gz
+
+WORKDIR /R-${R_VERSION_MAJOR}.${R_VERSION_MINOR}.${R_VERSION_PATCH}
+
+RUN ./configure ${CONFIGURE_OPTIONS} && \
+    make && \
+    make install
+
+RUN locale-gen en_US.UTF-8
+
+WORKDIR /root
+
+RUN mkdir settings
+
+COPY packages.json install_packages.R requirements.txt install_quarto.sh ./settings/
+RUN Rscript ./settings/install_packages.R
+
+# Installing Quarto
+RUN bash ./settings/install_quarto.sh $QUARTO_VER
+COPY .Rprofile /root/
+
+# Step 5 - Set Python Environment and install radian
+RUN python3 -m venv /opt/$VENV_NAME  \
+    && export PATH=/opt/$VENV_NAME/bin:$PATH \
+    && echo "source /opt/$VENV_NAME/bin/activate" >> ~/.bashrc
+
+RUN pip3 install -r ./settings/requirements.txt
+```
+
+This Dockerfile includes the following five steps:
+- Import Ubuntu version 22.04 image as the baseline image
+- Set arguments and environment variables. That includes the R version settings, the CRAN mirror, etc.
+- Install R dependencies and command lines tools- Debian libraries (git, C and Fortran compilers, vim, curl, etc.)
+- Install R and set it, and Quarto
+- Set Python virtual environment and install radian
+
+
+Let's now break down and explain those steps in further detail.
+
+### Baseline Image
+
+Our first step is to import a baseline image. We will use the `FROM` command to import the official Ubunto version `22.04` image as our baseline image for this build:
+
+```Dockerfile
+# Step 1 - Import base image
+FROM ubuntu:22.04
+``` 
+
+More details on this image can be found on [Docker Hub](https://hub.docker.com/layers/library/ubuntu/22.04/images/sha256-ffa841e85005182836d91f7abd24ec081f3910716096955dcc1874b8017b96c9?context=explore). In the following steps, we will install R and its dependecies on top of this base image.
+
+### Argument vs. Environment variables
+
+Next, we will define the build arguments and set environment variables:
+
+```Dockerfile
+# Step 2 - Set arguments and environment variables
+# Define arguments
+ARG PROJECT_NAME=PROJECT_NAME
+ARG VENV_NAME=VENV_NAME
+ARG R_VERSION_MAJOR=4
+ARG R_VERSION_MINOR=3
+ARG R_VERSION_PATCH=1
+ARG DEBIAN_FRONTEND=noninteractive
+ARG CRAN_MIRROR=https://cran.rstudio.com/
+ARG QUARTO_VER="1.3.450"
+
+# Define environment variables
+ENV PROJECT_NAME=$PROJECT_NAME
+ENV VENV_NAME=$VENV_NAME
+ENV R_VERSION_MAJOR=$R_VERSION_MAJOR
+ENV R_VERSION_MINOR=$R_VERSION_MINOR
+ENV R_VERSION_PATCH=$R_VERSION_PATCH
+ENV QUARTO_VER=$QUARTO_VER
+ENV CONFIGURE_OPTIONS="--with-cairo --with-jpeglib --enable-R-shlib --with-blas --with-lapack"
+ENV TZ=UTC
+ENV CRAN_MIRROR=$CRAN_MIRROR
+```
+
+This includes setting variables to define the R and Quarto versions, the R configurations, etc. The use of arguments during the build time allows us to modify and update the image settings as necessary. For instance, in the above `Dockerfile`, we used three arguments to indicate the major, minor, and path values of the R version. We set the default version as `4.3.1`. If required, we can modify the R version by assigning values to the image arguments using the `--build-arg` argument.  For example, the below build command will create an image with R version `4.1.0` and set the image name as `rkrispin/vscode-r` and tag it as `rv4.1.0`:
+
+``` shell
+docker build .  -f ./.devcontainer/Dockerfile.dev \
+       --build-arg R_VERSION_MAJOR=4 \
+       --build-arg R_VERSION_MINOR=3 \
+       --build-arg R_VERSION_PATCH=1 \
+       -t rkrispin/vscode-r:rv4.1.0
+```
+
+Environment variables can be set on the `Dockerfile` using the `ENV` command or can pass directly to the container during the run time. Typically, we set environment variables for fixed values with the `Dockerfile`. For example, we set the time zone as `UTC` using the `TZ` variable. 
+
+**Note:** It is crucial to **NEVER** (but never!) store any sensitive information, like passwords, credentials, API keys, or other confidential data, in the Dockerfile itself. Instead, it is recommended to pass these variables during runtime. In this tutorial, we will explore various methods for setting environment variables during runtime using the **Dev Containers** extension.
+
+While both arguments and environment variables are types of variables, the main difference between the two is that the first is used only during the build time, and the last is also available during the run time of the container.
+
+### Installing Required Dependencies 
+
+Since we are using a minimalist image as our baseline image, Ubuntu version `22.04` and some baseline tools. Since we are using this image, we must first install the Debian dependencies that R requires before we can install it. We will use the `apt-get` command to install those dependencies and some command-line tools:
+
+
+```Dockerfile
+# Step 3 - Install R dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    apt-utils\
+    gfortran \
+    git \
+    g++ \
+    libreadline-dev \
+    libx11-dev \
+    libxt-dev \
+    libpng-dev \
+    libjpeg-dev \
+    libcairo2-dev \
+    libcurl4-openssl-dev \
+    libssl-dev \
+    libxml2-dev \
+    libudunits2-dev \
+    libgdal-dev \
+    libbz2-dev \
+    libzstd-dev \
+    liblzma-dev \
+    libpcre2-dev \
+    locales \
+    openjdk-8-jdk \
+    screen \
+    texinfo \
+    texlive \
+    texlive-fonts-extra \
+    vim \
+    wget \
+    xvfb \
+    tzdata \
+    sudo\
+    jq\
+    curl\
+    libgit2-dev \
+    libmagick++-dev \
+    make \
+    tmux \
+    python3-launchpadlib \
+    python3.10-dev \
+    python3.10-venv \
+    python3-pip \
+&& rm -rf /var/lib/apt/lists/*
+
+
+```
+
+As we are setting the R environment almost from scratch, there is a long list of dependencies. This includes some Debian dependencies that are required to install R and some of the packages and command line tools. We use the RUN command to execute apt-get command to install those dependencies. One of the main challenges in this type of build is to identify what dependencies required them in the first place. While it is not in the scope of this tutorial, here are some tips:
+- **Build log -** when the build fails, the build log provides information about the error type or failure reason. By default, the `docker build` returns a concise output, which may not contain the error information. To get the full build log output, set the progress argument as plain (`--progress=plain`) 
+- **System requirements -** when adding a new R package, check the package description to see if the `SystemRequirements` section is available. For example, one of the R environment requirements is the [httpgd](https://cran.r-project.org/web/packages/httpgd/index.html) package that enables running interactive R applications in VScode, such as Shiny applications, or HTML widgets, such as Plotly. The package description provides the package system requirements (as can be seen in Figure 10 below) -  [C++17](https://packages.debian.org/buster/g++), [libpng](https://packages.debian.org/buster/libpng-dev), [cairo](https://packages.debian.org/buster/libcairo2-dev), [freetype2](https://packages.debian.org/buster/freetype2-demos), [fontconfig](https://packages.debian.org/buster/fontconfig), which must be installed before installing this package
+
 
 
 <figure>
-<img src="images/dev_container_symbol.png" width="20%" align="center"/></a>
-<figcaption> Figure 10 - The Dev Containers extension status bar symbol</figcaption>
+<img src="images/httpgd-sys-req.png" width="100%" align="center"/></a>
+<figcaption> Figure 10 - The httpgd package system requirements on the package description</figcaption>
 </figure>
+
 <br>
 
-### Setting the devcontainer.json file
 
-The Dev Containers extension enables to open a local folder inside a containerized environment. This solves the container ephemeral issue and enables you to maintain your code locally while developing and testing it inside a container.
+### Installing R 
 
-To set the Dev Containers extension on your local folder, create a folder named `.devcontainer` and add the `devcontainer.json` file. In addition, we will use the `settings.json` file under the `.vscode` folder to customize the VScode settings. Generally, your project folder should follow the following structure:
+This section focuses on the 4th step - installing R and setting it. This includes the following sub-steps:
+- Install R from CRAN 
+- Config and set R
+- Install packages
+- Install Quarto
+- Set the R profile
 
-``` shell
-.
-├── .devcontainer
-│   └── devcontainer.json
-├── .vscode
-│   └── settings.json
-└── Your Projects Files
-``` 
+We use the [wget](https://www.gnu.org/software/wget/) package (a command line application for downloading files from websites) to pull the R installation file as a `tar` file, extract it, and install it. Note that we use the arguments we set in step 2 to define the R version (default is `4.3.1`): 
 
-The `devcontainer.json` defines and customizes the container and VScode setting, such as:
 
-- Image settings - defines the image build method or if to pull an existing one 
-- Project settings such as extensions to install and command to execute during the launch time of the container
+``` Dockerfile
+# Step 4 - Install R
+RUN wget https://cran.rstudio.com/src/base/R-${R_VERSION_MAJOR}/R-${R_VERSION_MAJOR}.${R_VERSION_MINOR}.${R_VERSION_PATCH}.tar.gz && \
+    tar zxvf R-${R_VERSION_MAJOR}.${R_VERSION_MINOR}.${R_VERSION_PATCH}.tar.gz && \
+    rm R-${R_VERSION_MAJOR}.${R_VERSION_MINOR}.${R_VERSION_PATCH}.tar.gz
+
+```
+
+After we installed R inside the image, the next step is configuring it. We use the `CONFIGURE_OPTIONS` variable to define the R graphic and font settings: 
+
+``` Dockerfile
+
+WORKDIR /R-${R_VERSION_MAJOR}.${R_VERSION_MINOR}.${R_VERSION_PATCH}
+
+RUN ./configure ${CONFIGURE_OPTIONS} && \
+    make && \
+    make install
+
+RUN locale-gen en_US.UTF-8
+```
+
+The WORKDIR command defines the folder we installed, R as the default folder. We use the `make` package to define the default settings and set the default fonts.
+
+
+### Installing R Packages
+
+To install the required R packages, we will use the following helper scripts:
+- [packages.json](https://github.com/RamiKrispin/vscode-r/blob/main/.devcontainer/packages.json) - A JSON file with a list of required packages and their versions
+- [install_packages.R](https://github.com/RamiKrispin/vscode-r/blob/main/.devcontainer/install_packages.R) - A R script that parses the JSON file and installs the packages
+
+
+In the next step below, we set the root folder as the default, create a new folder named settings, and copy the above files to the settings folder:
+
+```Dockerfile
+WORKDIR /root
+
+RUN mkdir settings
+
+COPY packages.json install_packages.R requirements.txt install_quarto.sh ./settings/
+```
+
+**Note:** In addition to the `packages.json` and `install_packages.R` files, we also copied the `requirements.txt` and `install_quarto.sh` files which will be used to set the radian package and install Quarto
+
+Next, we execute the R script we copied to the `settings` folder:
+
+```Dockerfile
+RUN Rscript ./settings/install_packages.R
+
+```
+
+**Note:** The package installation process might take a few minutes. There are a few methods to speed up the process, such as installing the packages using the binary build or using renv, but it is outside the scope of this tutorial.
+
+### Installing Quarto
+
+We use the `install_quarto.sh`,which was copied to the `settings` folder in the previous step, to install Quarto. This `bash` script uses an argument to define the Quarto version, and we pass the `QUARTO_VER` variable that we set as an argument in step 2:
+
+```Dockerfile
+# Installing Quarto
+RUN bash ./settings/install_quarto.sh $QUARTO_VER
+```
+
+### Setting the R profile
+
+The last step in this process is to copy the `.Rprofile` file to the root folder:
+```Dockerfile
+COPY .Rprofile /root/
+```
+
+The `.Rprofile` file allows us to set global configurations that R loads during the launch of a new session. Later in this tutorial, we will review the use case of this .Rprofile file.
+
+
+
+
+
+## Setting the Dev Containers Extension
 
 
 

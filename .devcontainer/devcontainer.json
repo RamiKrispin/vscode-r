@@ -9,7 +9,8 @@
             "R_VERSION_MAJOR": "4",
             "R_VERSION_MINOR": "3",
             "R_VERSION_PATCH": "1",
-            "CRAN_MIRROR": "https://cran.rstudio.com/" 
+            "CRAN_MIRROR": "https://cran.rstudio.com/",
+            "QUARTO_VER": "1.3.450" 
         }
     }, 
     "settings": {
