@@ -1071,10 +1071,70 @@ COPY .Rprofile /root/
 The `.Rprofile` file allows us to set global configurations that R loads during the launch of a new session. Later in this tutorial, we will review the use case of this .Rprofile file.
 
 
+### Customize the R Environment
+The main goal of using arguments and environment variables with the Dockerfile is to enable modification and update the R environment. For example, as mentioned above, the R version is defined with the R_VERSION_MAJOR, R_VERSION_MINOR, and R_VERSION_PATCH arguments. 
 
+The `packages.json` file defines the list of packages to install during the build time and it follow the below structure:
 
+```json
+{
+  "package": "Package Namme",
+  "version": "Package Version"
+        }
+```
+
+For running R with VScode we will need the following two packages:
+- [languageserver](https://github.com/REditorSupport/languageserver) - An implementation of the Language Server Protocol for R, required for setting R in VScode
+- [httpgd](https://github.com/nx10/httpgd) - Asynchronous http server graphics device for R, used for view graphic applications in VScode
+
+Below is the full list of packages used in this tutorial:
+
+```json
+{
+    "packages": [
+        {
+            "package": "BH",
+            "version":"1.81.0-1"
+        },
+        {
+            "package": "languageserver",
+            "version":"0.3.12"
+        },
+        {
+            "package": "httpgd",
+            "version":"1.3.1"
+        },
+        {
+            "package": "rmarkdown",
+            "version":"2.21"
+        },
+        {
+            "package": "dplyr",
+            "version":"1.1.3"
+        },
+        {
+            "package": "ggplot2",
+            "version":"3.4.3"
+        },
+        {
+            "package": "shiny",
+            "version":"1.7.4"
+        },
+        {
+            "package": "plotly",
+            "version":"4.10.2"
+        }
+}
+```
+
+It is strightforward to add new package or remove existing ones by modify the packages.json file as long as keeping the above format. One thing to note is when adding new packages you may need to install additional Debian dependencies  (i.e., step 3). In some cases, those dependencies specify on the package DESCRIPION file. On other cases, the build fail and you will have to extract from the error log the potential missing depenedecies.  
+
+In the next section, we will focus on setting the Dev Containers extension.
 
 ## Setting the Dev Containers Extension
+
+So far, we covered the foundation of Docker. We saw how to set and build an image with the `Dockerfile` and the `build` command, respectively, and then `run` it in a container with the run command. In addition, we saw how to set from scratch a dockerized R environment. In this section, we will review the Dev Containers extenssion and see how to set a dockerized R develop environment with VScode.
+
 
 
 
