@@ -14,8 +14,7 @@ See also:
 <img src="images/vscode-shiny1024.gif" width="100%" align="center"/></a>
 
 </figure>
-
-## Table of Content:
+Table of Contents:
 
 * [Motivation](https://github.com/RamiKrispin/vscode-r#motivation)
 * [Scope](https://github.com/RamiKrispin/vscode-r#scope)
@@ -390,7 +389,7 @@ The next section will focus on the image layers and caching process.
 
 Docker builds images using a layers approach. Depending on the context, the docker engine takes each of the `Dockerfile` commands during the build time and translates it into layer or metadata. `Dockerfile` commands, such as `FROM` and `RUN`, create layers, and commands, such as `LABEL`, `ARG`, `ENV`, and `CMD`, create metadata. For example, we can observe in the output of the build of `rkrispin/vscode-r:ex1` image above that there are two layers:
 
-- The first layer started with `[1/2] FROM...`, corresponding to the `FROM r-base:4.3.1` line on the `Dockerfile`, which import the base-R image from the Rocker project
+- The first layer started with `[1/2] FROM...`, corresponding to the `FROM r-base:4.3.1` line on the `Dockerfile, which imports the base-R image from the Rocker project
 - The second layer started with `[2/2] RUN apt-get...`, corresponding  to the `RUN` command on the `Dockerfile`
 
 
@@ -401,7 +400,7 @@ Docker builds images using a layers approach. Depending on the context, the dock
 
 <br>
 
-The `docker inspect` command returns the image metadata details in a JSON format. That includes the envrioment variables, labels, layers and general metadata. In the following example, we will us [jq](https://jqlang.github.io/jq/) to extract the layers information from the metadata JSON file:
+The `docker inspect` command returns the image metadata details in a JSON format. That includes the environment variables, labels, layers and general metadata. In the following example, we will use [jq](https://jqlang.github.io/jq/) to extract the layers information from the metadata JSON file:
 
 ``` shell
 docker inspect rkrispin/vscode-r:ex1 | jq '.[] | .'
@@ -1070,11 +1069,43 @@ COPY .Rprofile /root/
 
 The `.Rprofile` file allows us to set global configurations that R loads during the launch of a new session. Later in this tutorial, we will review the use case of this .Rprofile file.
 
+### Installing radian
+
+In VScode, code is executed on the terminal. If you are used to working with RStudio, this concept might initially feel awkward. There are mainly two methods to execute R code on the terminal:
+- Native R
+- Radian
+
+In this tutorial, we will use [Radian](https://github.com/randy3k/radian) to run R code on the terminal. Radian is a Python library that provides an interactive and colorful wrapper to the native R. It includes features such as:
+- Code completion
+- Syntax highlight
+
+To install `radian`, we will first set up a virtual environment with `venv`:
+
+``` Dockerfile
+RUN python3 -m venv /opt/$VENV_NAME  \
+    && export PATH=/opt/$VENV_NAME/bin:$PATH \
+    && echo "source /opt/$VENV_NAME/bin/activate" >> ~/.bashrc
+```
+
+**Note:** We use the `VENV_NAME` environment variable, which we set in step 2, to set the virtual environment name.
+
+Once we have the virtual environment set, we can install `radian`. We will use the `pip3` command with the `requirements.txt` file to install `radian`: 
+
+```Dockerfile
+RUN pip3 install -r ./settings/requirements.txt
+```
+
+Generally, since we install only `radain` you could also use:
+
+```Dockerfile
+RUN pip3 install radain
+```
 
 ### Customize the R Environment
+
 The main goal of using arguments and environment variables with the Dockerfile is to enable modification and update the R environment. For example, as mentioned above, the R version is defined with the R_VERSION_MAJOR, R_VERSION_MINOR, and R_VERSION_PATCH arguments. 
 
-The `packages.json` file defines the list of packages to install during the build time and it follow the below structure:
+The `packages.json` file defines the list of packages to install during the build time , and it follows the below structure:
 
 ```json
 {
@@ -1083,15 +1114,10 @@ The `packages.json` file defines the list of packages to install during the buil
         }
 ```
 
-For running R with VScode we will need the following two packages:
-- [languageserver](https://github.com/REditorSupport/languageserver) - An implementation of the Language Server Protocol for R, required for setting R in VScode
-- [httpgd](https://github.com/nx10/httpgd) - Asynchronous http server graphics device for R, used for view graphic applications in VScode
-
 Below is the full list of packages used in this tutorial:
 
 ```json
-{
-    "packages": [
+"packages": [
         {
             "package": "BH",
             "version":"1.81.0-1"
@@ -1124,21 +1150,67 @@ Below is the full list of packages used in this tutorial:
             "package": "plotly",
             "version":"4.10.2"
         }
-}
+    ]
 ```
 
-It is strightforward to add new package or remove existing ones by modify the packages.json file as long as keeping the above format. One thing to note is when adding new packages you may need to install additional Debian dependencies  (i.e., step 3). In some cases, those dependencies specify on the package DESCRIPION file. On other cases, the build fail and you will have to extract from the error log the potential missing depenedecies.  
+
+For running R with VScode, we need the following two packages:
+- [languageserver](https://github.com/REditorSupport/languageserver) - An implementation of the Language Server Protocol for R, required for setting R in VScode
+- [httpgd](https://github.com/nx10/httpgd) - Asynchronous HTTP server graphics device for R, used for viewing graphic applications in VScode
+
+In addition, to demonstrate some of the core use cases of R with VScode (e.g., graphic, interactivity, working with Shiny, etc.), we install the following packages: 
+- [shiny](https://shiny.posit.co/)
+- [plotly](https://plotly.com/r/)
+- [ggplot2](https://ggplot2.tidyverse.org/)
+
+The `packages.json` file enables you to seamlessly set, update, and modify the installed packages and their versions. One thing to note is that when adding new packages, you may need to install additional Debian dependencies (i.e., step 3). In some cases, those dependencies are specified on the package `DESCRIPTION` file. In other cases, when the build fails during the package installation, you will have to extract the missing dependencies from the error log.
 
 In the next section, we will focus on setting the Dev Containers extension.
 
 ## Setting the Dev Containers Extension
 
-So far, we covered the foundation of Docker. We saw how to set and build an image with the `Dockerfile` and the `build` command, respectively, and then `run` it in a container with the run command. In addition, we saw how to set from scratch a dockerized R environment. In this section, we will review the Dev Containers extenssion and see how to set a dockerized R develop environment with VScode.
+So far, we covered the foundation of Docker. We saw how to set and build an image with the `Dockerfile` and the `build` command, respectively, and then run it in a container with the `run` command. In addition, we saw how to set a dockerized R environment from scratch. This section focuses on the [Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension and how to set a dockerized R development environment with VScode.
 
 
+If you still need to install the Dev Containers extension or Docker Desktop, follow the installation instructions above. Once the extension is installed, you should expect to see on the far left side the extension status bar symbol (`><` alike):
+
+
+<figure>
+<img src="images/dev_container_symbol.png" width="20%" align="center"/></a>
+<figcaption> Figure 10 - The Dev Containers extension status bar symbol</figcaption>
+</figure>
+<br>
+
+### Setting the devcontainer.json file
+
+The Dev Containers extension enables isolating a VScode session inside a containerized environment. By default, it mounts the local folder to the container and enables the mount of other local folders as well. This solves the container ephemeral issue and enables "enjoy" both worlds - running the code in an isolated environment and keeping changes in the code locally.
+
+To launch your local folder inside a container with the Dev Container extension, you will have to create the `.devcontainer` folder and add the `devcontainer.json` file:
+
+``` sehll
+.
+├── .devcontainer
+│   └── devcontainer.json
+├── .vscode
+│   └── settings.json
+└── Your Projects Files and Folders
+```
+
+The `devcontainer.json` defines the environment settings such as:
+- Image settings
+- Extensions settings
+- Environment variables
+- Mount additional folders 
+
+
+**Note:** The `settings.json` file under the `.vscode` folder in the folder tree above is an optional settings file that enables the customization of the VScode settings for the local folder. The next section covers this topic in detail.
+
+Let's start with a simple example, exporting a `base-r` image from the Rocker project:
 
 
 ## Resources
+- Radian - https://github.com/randy3k/radian
+
 
 ## License
 

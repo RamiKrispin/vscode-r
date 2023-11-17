@@ -1,0 +1,45 @@
+{
+    "name": "R Dev Environment",
+    "build": {
+        "dockerfile": "Dockerfile.dev",
+        "context": ".",
+        "args": {
+            "PROJECT_NAME": "PROJECT_NAME",
+            "VENV_NAME": "R_ENV",
+            "R_VERSION_MAJOR": "4",
+            "R_VERSION_MINOR": "3",
+            "R_VERSION_PATCH": "1",
+            "CRAN_MIRROR": "https://cran.rstudio.com/",
+            "QUARTO_VER": "1.3.450"
+        }
+    },
+    "settings": {
+        "files.associations": {
+            "*.Rmd": "rmd"
+        }
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                // R Extensions
+                "rdebugger.r-debugger",
+                "reditorsupport.r",
+                "REditorSupport.r",
+                "REditorSupport.r-lsp",
+                "RDebugger.r-debugger",
+                // Documentation Extensions
+                "quarto.quarto",
+                "purocean.drawio-preview",
+                "redhat.vscode-yaml",
+                "yzhang.markdown-all-in-one",
+                // Docker Supporting Extensions
+                "ms-azuretools.vscode-docker",
+                "ms-vscode-remote.remote-containers",
+                // Python Extensions
+                "ms-python.python",
+                "ms-toolsai.jupyter"
+            ]
+        }
+    },
+    "postCreateCommand": "radian"
+}

@@ -1,0 +1,4 @@
+{
+    "name": "R Dev Environment",
+    "image": "r-base:4.3.1"
+}
