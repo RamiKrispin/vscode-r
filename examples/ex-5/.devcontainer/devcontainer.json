@@ -1,0 +1,13 @@
+{
+    "name": "R Dev Environment",
+    "image": "r-base:4.3.1",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                // R Extensions
+                "reditorsupport.r"
+            ]
+        }
+    },
+    "postCreateCommand": "bash .devcontainer/install_dependencies.sh"
+}
