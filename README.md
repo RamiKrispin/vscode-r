@@ -1235,17 +1235,46 @@ Here is a typical structure of the `devcontainer.json` file:
 
 In this example, we are using the following arguments:
 - `name` - Optional, defines the project name
-- `image` - Defines the docker image to containerized the project
+- `image` - Defines the docker image to containerized the project, in this case we use the `r-base:4.3.1` - base R image from the Rocker project
 - `extensions` - Optional, under the `customizations/vscode`, enables to set a list of extensions to install
 - `postCreateCommand` - Optional, enables to set a post-create command, in this case launching the `radian` on the terminal
 
+Here are some additional arguments that can be useful later on:
+- `build` - An alternative for the `image` argument, this argument lets you build the image during the launch time of the environment.
+- `mounts` - This is an optional argument that enables you to mount local volumes (folders) to the container during the runtime, in addition to the project folder.
+- `remoteEnv` - This is another optional argument that sets environment variables.
 
-In the coming sections, we will see the use of other arguments. 
-
-### The devcontainer.json arguments
+To learn more about the `devcontainer.json` arguments, check out the [metadata reference](https://containers.dev/implementors/json_reference/).
 
 
-### Launching R
+### Launching the folder inside a container
+
+Once you set the `devcontainer.json`, to launch the folder inside the container, go to the bottom far left side of your VScode screen and click the Dev Containers' status bar ()`><` symbol alike). This will open the VScode Command Palette on the top of the screen, and you should see the Dev Containers extension's common commands. Select the `Reopen in Container` options (see the screenshot below):
+
+<figure>
+<img src="images/command-palette.png" width="100%" align="center"/></a>
+<figcaption> Figure 11 - the Dev Containers extensions Command Palette </figcaption>
+</figure>
+
+<br>
+
+The below video demonstrates the full process of launching the Python environment inside a container with the Dev Containers extension:
+
+
+<figure>
+<img src="images/open_dev_container.gif" width="100%" align="center"/></a>
+<figcaption> Figure 12 - Open a folder inside a container with the Dev Containers extension</figcaption>
+</figure>
+
+<br/>
+
+The next section focuses on customizing the R environment with the `devcontainer.json` file.
+
+## Setting R environment
+
+This section focuses on setting up an R dockerized development environment with the Dev Containers extension. We will extend the use of the `devcontainer.json` file, starting from simple use cases to advanced settings. In addition, we review potential issues that you may encounter during the installation process of the R dependencies (e.g., packages, etc.).
+
+### Basic R settings
 
 Let's start with a simple example, importing a `base-r` image from the Rocker project:
 
@@ -1256,15 +1285,14 @@ Let's start with a simple example, importing a `base-r` image from the Rocker pr
     "image": "r-base:4.3.1"
 }
 ```
-
+**Note:** The example is available in the examples folder - `examples/ex-3/`. To open and run the example, you must open the example folder in a new VScode session.
 
 
 # Add a record
 
-
 In this example, we use the following two arguments:
-- `name` - sets the environment name
-- `image` - defines the image to use for the environment
+- `name` - Defines the environment name
+- `image` - Sets the `r-base:4.3.1` base R image from the Rocker project as our environment 
 
 Using the `image` argument enables importing a built-in and ready-to-use image and spinning it as a container. This is a convenient alternative to building the image on the fly, which can be done using the `build` argument. We will explain how to use the `build` argument later in this tutorial.
 
@@ -1274,10 +1302,12 @@ Once we set the `devcontainer.json` file, follow the below steps to launch the f
 - Open VScode remote window and select the `Reopen in Container` option
 - VScode will luanch the session inside the container
 
-After launching the container, you will see that the project folder is mounted inside it. You can then open R on the terminal and start running the code. However, it's worth noting that you won't be able to send R files to the R console and execute them. For example, if you want to run the code in the `test.R` script under the `ex-3` folder, you will have to copy the script from the file and paste it into the R console. There are better ways to run R code than that. In the next section, we will see how to set the R script to run in the R console using the R extension for VScode. 
+If this is the first time you are using the `r-base:4.3.1` image, it might take a few minutes to download. Once the image is available on your local machine it takes few seconds to open the dockerized environment.
+
+After launching the container, you will see that the project folder is mounted inside it. You can then open R on the terminal and start running the code. However, it's worth noting that you won't be able to send R files to the R console and execute them. For example, if you want to run the code in the `test.R` script under the `ex-3` folder, you will have to copy the script from the file and paste it into the R console. There are better ways to run R code than that. In the next section, we will see how to set the R script to run in the R console using the [R extension to VScode](https://marketplace.visualstudio.com/items?itemName=REditorSupport.r). 
 
 
-### Setting Extensions
+### Setting the R Extension 
 
 VScode is a powerful code editor, but its basic functionality is limited without extensions. Just like R without packages, it needs extensions to expand its functionality and enable a high level of customization. One of the best features of the Dev Containers is the complete isolation of the dockerized environment from the local VScode session. However, this also means that local extensions won't be available when launching a dockerized session with the Dev Containers extension. To solve this issue, you can use the `devcontainer.json` file to define the extensions to install in the dockerized environment using the `extensions` section under the `customizations/vscode` field. 
 
@@ -1299,6 +1329,7 @@ Let's consider the previous example where we ran R from the terminal but could n
     "postCreateCommand": "Rscript .devcontainer/dependencies.R"
 }
 ```
+
 
 
 
@@ -1662,6 +1693,8 @@ Last but not least, all feedback is welcome! Please feel free to open an issue i
 
 ## Resources
 - Radian - https://github.com/randy3k/radian
+- Dev Containers - https://code.visualstudio.com/docs/devcontainers/containers
+- Dev Containers metadata reference - https://containers.dev/implementors/json_reference/
 
 
 ## License
