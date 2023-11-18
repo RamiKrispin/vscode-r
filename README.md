@@ -1311,9 +1311,9 @@ After launching the container, you will see that the project folder is mounted i
 
 VScode is a powerful code editor, but its basic functionality is limited without extensions. Just like R without packages, it needs extensions to expand its functionality and enable a high level of customization. One of the best features of the Dev Containers is the complete isolation of the dockerized environment from the local VScode session. However, this also means that local extensions won't be available when launching a dockerized session with the Dev Containers extension. To solve this issue, you can use the `devcontainer.json` file to define the extensions to install in the dockerized environment using the `extensions` section under the `customizations/vscode` field. 
 
-Let's consider the previous example where we ran R from the terminal but could not execute it directly from the script. To solve this issue, we will install the [R extension to VScode](https://marketplace.visualstudio.com/items?itemName=REditorSupport.r):
+Let's consider the previous example (example 3) where we ran R from the terminal but could not execute it directly from the script. In the next example (see `./examples/ex-4/`), we will use the `extensions` argument to install in the environment the  [R extension to VScode](https://marketplace.visualstudio.com/items?itemName=REditorSupport.r):
 
-
+`./examples/ex-4/.devcontainer/devcontainer.json`
 ```json
 {
     "name": "R Dev Environment",
@@ -1330,42 +1330,47 @@ Let's consider the previous example where we ran R from the terminal but could n
 }
 ```
 
-
-
-
-
 As one of the dependcies of the R extension to VScode is the [languageserver](https://github.com/REditorSupport/languageserver) package, we will use the post create command argument (`postCreateCommand`) to run the `dependencies.R` file which simply installs the package:
 
 `examples/ex-4/.devcontainer/dependencies.R`
 ```R
 install.packages("languageserver")
 ```
-Please note that using the post-create command to install dependencies is not a robust or efficient approach. We will only use it to illustrate possible problems that may arise while installing R packages. Later, we will introduce more reliable methods for managing dependencies.
+Please note that using the post-create command to install dependencies is **not a robust or efficient approach**. We will only use it to illustrate possible problems that may arise while installing R packages. Later, we will introduce more reliable methods for managing dependencies.
 
-To run the following example, open the `./examples/ex-4` on a new session in VScode and rebuild the container. To review the output of the `postCreateCommand` argument, click on the `show logs` option that pops on the bottom of the screen during this process or open the `Configuration` tab on the terminal window (ping rectangle in Figure 11 below). You should expect to see when this process is complete to run the following error message (marked in red):
+To run the following example, open the `./examples/ex-4` on a new session in VScode and rebuild the container. To review the output of the `postCreateCommand` argument, click on the `show logs` option that pops on the bottom of the screen during this process or open the `Configuration` tab on the terminal window (ping rectangle in Figure 13 below). You should expect to see when this process is complete to run the following error message (marked in red):
 
 <figure>
 <img src="images/languageserver-error.png" width="100%" align="center"/></a>
-<figcaption> Figure 11 - the output of the post create command, tring to install the languageserver package   </figcaption>
+<figcaption> Figure 13 - the output of the post create command, tring to install the languageserver package   </figcaption>
 </figure>
 
 <br>
 
-This error represents common issues when setting up a new environment - missing dependencies. In this case, one of the `languageserver` package dependencies -  the `xml2` package cannot be installed, as potentially, it is missing some Debian dependency (or dependencies). 
+This error represents common issues when setting up a new environment - missing dependencies. In this case, one of the `languageserver` package dependencies -  the `xml2` package cannot be installed, as potentially, it is missing some Debian dependency (or dependencies). In the next section, we will review how to handle missing dependencies.
 
-While the post-creature command failed, the environment successfully opened, and you can now explore and try to debug the missing dependency. We will start by opening a new R session in the terminal and then try to install the `xml2` package. This will end up with the following error message:
+
+### Handling Missing Dependencies
+
+While the post-creature command failed, the environment was successfully opened. This allows us to explore and attempt to debug the missing dependency inside the container. Let's open a new R session in the terminal and attempt to install the `xml2` package. Sometimes, the error log can provide insight into the problem and make it easy to identify the issue or what is missing. However, in other cases, the error log might be vague, requiring additional research and investigation to determine the root cause. 
+
+In the case of the `xml2` package installation, the error is intuitive:
 
 
 
 <figure>
 <img src="images/xml2-error.png" width="100%" align="center"/></a>
-<figcaption> Figure 12 - the output of the post create command, tring to install the xml2 package   </figcaption>
+<figcaption> Figure 14 - the output of the post create command, tring to install the xml2 package   </figcaption>
 </figure>
 
 <br>
 
 
-Which indicates that we are missing the [libxml-2.0](https://packages.debian.org/buster/libxml2-dev) Debian library. Example 5 (under the `./examples/ex-5/` folder) provides an ad-hoc solution for this issue by leveraging  an helper bash script that install the missing Debian library and than install the `languageserver` package:
+Which indicates that we are missing the libxml-2.0 Debian library. To fix this issue, we will use the following ad-hoc fix:
+- Set a helper `bash` script to install the required dependencies
+- Use the post-create command to run the bash script
+
+In example 5 (under the ./examples/ex-5/ folder), we use this simple bash script to install the Debian dependency and the `languageserver` package:
 
 `./examples/ex-5/.devcontainer/install_dependencies.sh`
 ```bash
@@ -1374,7 +1379,7 @@ apt-get update && apt-get install -y --no-install-recommends libxml2-dev
 Rscript .devcontainer/dependencies.R
 ```
 
-Next, update the `devcontainer.json` post-create command to execute this bash script:
+And we update the post-create command to execute this bash script:
 
 `./examples/ex-5/.devcontainer/devcontainer.json`
 
@@ -1394,302 +1399,22 @@ Next, update the `devcontainer.json` post-create command to execute this bash sc
 }
 ```
 
-
-This
-
-
-
-# Add a record
-    execute this and similar examples you will
-
-Let's start with a practical example by setting the environment using the same image we build in the first example above (e.g., `rkrispin/vscode-python:ex1`). During the launch time of the environment, the Dev Containers extension follows the instractions in the `devcontainer.json` and sets the environment accordingly: 
-
-`.devcontainer/devcontainer.json`
-``` json
-{
-    "name": "Example 3",
-    "build":{
-        "dockerfile": "Dockerfile",
-        "context": "../"
-    }, 
-    "customizations": {
-        "vscode": {
-            "extensions": [
-                "quarto.quarto",
-                "ms-azuretools.vscode-docker",
-                "ms-python.python",
-                "ms-vscode-remote.remote-containers",
-                "yzhang.markdown-all-in-one",
-                "redhat.vscode-yaml",
-                "ms-toolsai.jupyter",
-                "hediet.vscode-drawio"
-            ]
-        }
-    }  
-}
-```
-
-**Note:** The `devcontainer.json` file must be stored under the `.devcontainer` folder or in the project root folder. To run the above example, you will have to open the `./examples/exp-3` folder in VScode as the project folder using the `File` -> `Open Folder...` options. 
-
-As can see in the above `devcontainer.json`, the `build` section defines the image build process. The `dockerfile` argument points out to the `Dockerfile` to use for the build. The `context` argument defines the files' system path for the `Dockerfile`. Although, we currently do not use the `context` argument in the build time, we will see its applications later. In addition, the `customizations` section enables you to customize the VScode options, such as extensions to install, default Python interpreter, and files to execute during the container launch.
-
-### Launching the folder inside a container
-
-Once you set the `devcontainer.json`, to launch the folder inside the container, go to the bottom far left side of your VScode screen and click the Dev Containers' status bar ()`><` symbol alike). This will open the VScode Command Palette on the top of the screen, and you should see the Dev Containers extension's common commands. Select the `Reopen in Container` options (see the screenshot below):
+Now, it is working!
 
 <figure>
-<img src="images/command-palette.png" width="100%" align="center"/></a>
-<figcaption> Figure 11 - the Dev Containers extensions Command Palette </figcaption>
+<img src="images/example-5.gif" width="100%" align="center"/></a>
+<figcaption> Figure 15 - Executing R from script   </figcaption>
 </figure>
 
 <br>
+ 
 
-The below video demonstrates the full process of launching the Python environment inside a container with the Dev Containers extension:
+### Using the build Argument
 
-
-<figure>
-<img src="images/open_dev_container.gif" width="100%" align="center"/></a>
-<figcaption> Figure 12 - Open a folder inside a container with the Dev Containers extension</figcaption>
-</figure>
-
-<br/>
-
-The next section focuses on customizing the Python environment.
-
-## Setting the Python Environment
-
-In this section, we will connect all the dots together and build a Python development environment using the following architecture:
-- We will start by setting the image using the following files:
-  - Create a `Dockerfile` to define the environment settings (e.g., Python version, packages to install, etc.). In addition, we will use the following helper files:
-    - I like to keep the `Dockerfile` as concise as possible by using a helper bash script (`install_dependencies.sh`) to install all the environment dependencies, such as Debian packages, installing and setting the Python environment with Conda (or a similar solution), etc. 
-    - In addition, we will use the `requirements.txt` file to define the list of Python packages to install in the environment
-  - The next step is to set up the Dev Containers extension:
-    - We will use the `devcontainer.json` file to define the VScode settings for the development environment. That includes the build method, a list of extensions to set, local volumes to mount, and defining environment variables, etc.
-    - In addition, we will use the `devcontainer.env` file to set additional environment variables. Note that those variables neither be available during the build time nor can be called by `devcontainer.json` file
-
-
-The `.devcontainer` folder should have the following files:
-
-```shell
-.
-├── Dockerfile
-├── devcontainer.env
-├── devcontainer.json
-├── install_dependencies.sh
-└── requirements.txt
-```
-
-
-Just before getting started, let's define our environment requirments:
-- Python version 3.10
-- Install the following packages:
-  - pandas v2.0.3
-  - plotly v5.15.0
-- Conda for setting the virtual environment
-- Install the following extensions:
-  - Docker support
-  - Python language support
-  - Markdown editor
-  - Quarto editor
-  - YAML language support 
-  - Jupyter notebook support
-- Last but not least, we would like to mount a local folder that is not the project folder to load CSV files
-
-In addition, to make this setting as customized as possible, we will set locally environment variables that will enable us to modify our settings, if needed. That includes the following variables:
-- `ENV_NAME` - we will use this variable to set the Conda environment name and to set the path to the default Python interpreter
-- `PYTHON_VER` - set the Python version for the conda environment
-- `CSV_PATH` - the local path for a folder with CSV files
-- `MY_VAR` - A general variable that we will use as example for setting environment variables
-
-On Mac and Linux you can use the `.zshrc` file to set those variables:
-
-~/.zshrc  
-```
-# Setting env variables for VScode
-export ENV_NAME=python_tutorial
-export PYTHON_VER=3.10
-export CSV_PATH=$HOME/Desktop/CSV
-export MY_VAR=some_var
-```
-
-For Windows users, you can use the `setx` command to the environment vairables:
-```
-setx variable_name "variable_value"
-```
-
-**Note:** VScode caches environment variables during the launch time. Therefore, when adding new environment variables during an open session, they won't be available until completely closing VScode and reopening it.
-
-
-### Setting the image
-
-We will use the below `Dockerfile` to build our Python environment:
-
-`.devcontainer/Dockerfile`
-``` Dockerfile
-FROM python:3.10
-
-# Arguments
-ARG PYTHON_VER
-ARG ENV_NAME
-
-# Environment variables
-ENV ENV_NAME=$ENV_NAME
-ENV PYTHON_VER=$PYTHON_VER
-
-# Copy files
-RUN mkdir requirements
-COPY requirements.txt requirements/
-COPY install_dependencies.sh requirements/
-
-# Install dependencies
-RUN bash requirements/install_dependencies.sh $ENV_NAME $PYTHON_VER
-
-```
-
-To keep the build time fairly short, we use the Python official image as our base image for our environment. The main advantage of using this base image type is that it comes with most of the required dependencies and saves us time (and pain). 
-
-Using arguments enables us to parameterize our environment settings. In this case, the user can modify the Python version and environment name using the `PYTHON_VER` and `ENV_NAME` arguments. I then set those arguments as environment variables for convenience (staying available after the build).
-
-Last but not least, we create a local folder (`requirements`) inside the image and copy files from our local drive based on the path that was defined by the context argument on the `devcontainer.json` file. The `install_dependencies.sh` is a bash helper script that installs dependencies (conda, vim, etc.), sets the conda environment, and installs Python packages using the list in the `requirements.txt` file.
-
-
-While we set the Python environment with conda, you can modify the script below to other alternatives such as `venv`, and `Poetry` in the below script:
-
-`.devcontainer/install_dependencies.sh`
-``` bash
-#!/bin/bash
-
-CONDA_ENV=$1
-PYTHON_VER=$2
-CPU=$(uname -m)
-
-
-# Installing prerequisites
-apt-get update && \
-    apt-get install -y \
-    python3-launchpadlib \
-    vim \
-    && apt update 
-
-
-# Install miniconda
-apt update && apt-get install -y --no-install-recommends \
-    software-properties-common \
-    && add-apt-repository -y ppa:deadsnakes/ppa \
-    && apt update 
-
-wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-${CPU}.sh -O ~/miniconda.sh \
-    && /bin/bash ~/miniconda.sh -b -p /opt/conda \
-    && export PATH=/opt/conda/bin:$PATH \
-    && conda init bash \
-    && conda install conda-build
-
-# Set environment
-. /root/.bashrc \
-    && conda create -y --name $CONDA_ENV python=$PYTHON_VER 
-
-echo "conda activate $CONDA_ENV" >> ~/.bashrc
-
-conda activate $CONDA_ENV
-
-# Install the Python packages
-pip3 install -r requirements/requirements.txt
-
-```
-
-**Note:** We use the `uname -m` CLI command to extract the CPU architecture (e.g., Intel, M1/2, etc.) and choose the conda's build accordingly.
-
-We will set the required packages for the Python environment with the `requirements.txt` file: 
-
-`.devcontainer/requirements.txt`
-```txt
-wheel==0.40.0
-pandas==2.0.3
-plotly==5.15.0
-plotly-express==0.4.1
-```
-
-### Setting the devcontainer.json file
-
-Once we set the image, the next step is setting the `devcontainer.json` file. We incorporated environment variables in the below settings to enable the seamless creation of multiple environments:
-
-
-`.devcontainer/devcontainer.json`
-
-```json
-{
-    "name": "${localEnv:ENV_NAME}",
-    "build": {
-        "dockerfile": "Dockerfile",
-        "args": {"ENV_NAME": "${localEnv:ENV_NAME}",
-                 "PYTHON_VER": "${localEnv:PYTHON_VER}"}, 
-        "context": "."
-    },
-    "customizations": {
-        "settings": {
-            "python.defaultInterpreterPath": "/opt/conda/envs/${localEnv:ENV_NAME}/bin/python"
-        },
-        "vscode": {
-            "extensions": [
-                "quarto.quarto",
-                "ms-azuretools.vscode-docker",
-                "ms-python.python",
-                "ms-vscode-remote.remote-containers",
-                "yzhang.markdown-all-in-one",
-                "redhat.vscode-yaml",
-                "ms-toolsai.jupyter"
-            ]
-        }
-    },
-
-    "mounts": [
-            "source=${localEnv:CSV_PATH},target=/home/csv,type=bind,consistency=cache"
-    ],
-    "remoteEnv": {
-        "MY_VAR": "${localEnv:MY_VAR}"
-    },
-    "runArgs": ["--env-file",".devcontainer/devcontainer.env"],
-    "postCreateCommand": "python3 tests/test1.py"
-}
-```
-
-For the build, we use the `dockerfile`, `args`, and `context` to define the Dockerfile, arguments (e.g., Python version and environment name), and folder contest during the build, respectively.
-
-We use the `python.defaultInterpreterPath` argument to set the path of the default Python interpreter to the conda environment we set during the build.
-
-With the `mounts` argument, we mount a local folder (outside the current folder) with a path inside the container (e.g., `home/csv`). Generally, you would use this option when you wish to load a file or data from a folder outside your working folder or make the separation between your data and code. In this case, the `CSV_PATH` environment variable defines the path of the local folder.
-
-The `remoteEnv` enables to set environment variables with the container. Alternatively, you can add a `.env` file with a list of environment variables using the `runArgs` argument.
-
-The `postCreateCommand` argument allows for the execution of commands after the build process has finished. In this case, we utilize it to run a basic test script that checks if the packages can be loaded and prints out the message `Hello World!`:
-
-`tests/test1.py`
-```python
-import pandas as pd
-import plotly as py
-import plotly.express as px
-
-print("Hello World!")
-```
-
- That's it! We are ready to launch the environment with the Dev Containers extension:
-
-
-<figure>
-<img src="images/open_dev_container2.gif" width="100%" align="center"/></a>
-<figcaption> Figure 13 - Launch the Python Environment with the Dev Containers extension</figcaption>
-</figure>
-
-<br/>
-
+So far, in the above `devcontainer.json` examples above, we used the `image` argument. Let's now review the alternative method for setting the Docker image with the Dev Containers extensions - the `build` argument. As the name implies, this argument is a wrapper for the `docker build` commandת enabling the build image during the launch time of the container.
 
 ## Summary
 
-This tutorial covered the foundation of setting a dockerized development environment for Python with VScode and Docker. We reviewed the process of setting up a Python environment using the Dev Containers extension. While this tutorial does not focus on Docker, it covers the foundation of Docker with the goal of reducing the entry barrier for new users. In addition, we saw how to set up and launch a containerized Python development environment with the Dev Containers extension. 
-
-Using environment variables enables us to parametized the environment and seamlessly modify and costimize it. The example above uses conda to set the Python environment but you can choose any other method that works best for your needs.
-
-Last but not least, all feedback is welcome! Please feel free to open an issue if you have any feedback about the tutorial or found some code issues.
 
 ## Resources
 - Radian - https://github.com/randy3k/radian
