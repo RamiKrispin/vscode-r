@@ -1,0 +1,16 @@
+{
+    "name": "R Dev Environment",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "context": "."
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                // R Extensions
+                "reditorsupport.r"
+            ]
+        }
+    },
+    "postCreateCommand": "R"
+}

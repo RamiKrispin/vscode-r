@@ -1411,8 +1411,145 @@ Now, it is working!
 
 ### Using the build Argument
 
-So far, in the above `devcontainer.json` examples above, we used the `image` argument. Let's now review the alternative method for setting the Docker image with the Dev Containers extensions - the `build` argument. As the name implies, this argument is a wrapper for the `docker build` commandת enabling the build image during the launch time of the container.
+So far, in the above `devcontainer.json` examples above, we used the `image` argument. Let's now review the alternative method for setting the Docker image with the Dev Containers extensions - the `build` argument. As the name implies, this argument is a wrapper for the `docker build` command enabling the build image during the launch time of the container. 
 
+
+So far, in the above `devcontainer.json` examples above, we used the `image` argument. Let's now review the alternative method for setting the Docker image with the `Dev Containers` extensions - the `build` argument. As the name implies, this argument is a wrapper for the `docker build` command, enabling the build image during the launch time of the container. Let's now transform the previous example (example 5) to run with the build argument. We will start by setting a `Dockerfile`:
+
+`./examples/ex-6/.devcontainer/Dockerfile`
+```Dockerfile
+FROM r-base:4.3.1
+
+RUN apt-get update && apt-get install -y --no-install-recommends libxml2-dev
+
+RUN Rscript -e 'install.packages("languageserver")'
+```
+
+As you can notice in the above Dockerfile, we are still using the `r-base:4.3.1` image as our base image and installing the required dependencies with the `RUN` argument. This will end up with the exact same environment as in the previous example. Next, let's update the `devcontainer.json` file:
+
+`./examples/ex-6/.devcontainer/devcontainer.json`
+
+```json
+{
+    "name": "R Dev Environment",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "context": "."
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                // R Extensions
+                "reditorsupport.r"
+            ]
+        }
+    },
+    "postCreateCommand": "R"
+}
+```
+
+We replaced the `image` argument with the `build` argument. We use the `dockerfile` and `context` arguments to define the `Dockerfile` to be used for this build and the folder path. In this case, the `.` defines the root folder. Last but not least, we set the `postCreateCommand` to open R in the terminal when launching the environment.
+
+# Add screenshot
+
+### Build vs. Image
+
+In the previous section, we introduced the build argument as an alternative to the image argument. This section will review the differences between the two and discuss when it is best to use each. 
+
+#### When should you use the build option?
+The build argument is useful to use during the development phase of your environment or if you are required to modify the environment settings frequently. This enables quick modification and testing of changes in the image on the environment. 
+
+#### When should you use the image option?
+If you have a stable image, you are not required to modify it frequently.
+
+
+#### Performance
+When using the build option, you should take into account that the first time you launch the environment, docker will build it from scratch (assuming there is no previous caching), and it might take time (depending on the build load). From the second launch, the process should cached, and the launch time should be the same as if using the image option.
+
+In the following sections, we will continue to expand on the build option.
+
+### Setting a Dynamic R Environment with Arguments
+
+When building a docker image, I love using arguments and environment variables as much as possible. This enables high customization and modification of the image characteristics without code change. In the following example, we will leverage the tutorial main `Dockerfile` and `devcontainer.json` settings available under the `.devecontainer` folder to build a dynamic R environment. This includes the ability to modify the R version to build an image with dynamic settings of the R and Quarto versions and the CRAN mirror:
+
+``` json
+{
+    "name": "R Dev Environment",
+    "build": {
+        "dockerfile": "Dockerfile.dev",
+        "context": ".",
+        "args": {
+            "VENV_NAME": "R_ENV",
+            "R_VERSION_MAJOR": "4",
+            "R_VERSION_MINOR": "3",
+            "R_VERSION_PATCH": "1",
+            "CRAN_MIRROR": "https://cran.rstudio.com/",
+            "QUARTO_VER": "1.3.450"
+        }
+    },
+    "settings": {
+        "files.associations": {
+            "*.Rmd": "rmd"
+        }
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                // R Extensions
+                "rdebugger.r-debugger",
+                "reditorsupport.r",
+                // Documentation Extensions
+                "quarto.quarto",
+                "purocean.drawio-preview",
+                "redhat.vscode-yaml",
+                "yzhang.markdown-all-in-one",
+                // Docker Supporting Extensions
+                "ms-azuretools.vscode-docker",
+                "ms-vscode-remote.remote-containers",
+                // Python Extensions
+                "ms-python.python",
+                "ms-toolsai.jupyter"
+            ]
+        }
+    },
+    "postCreateCommand": "radian"
+}
+```
+
+We feed to the build argument the following arguments:
+- `VENV_NAME` - This variable set the Python virutal environment name. We use the environment to install radian
+- `R_VERSION_MAJOR` - Set the R verion major digit (e.g., 4.x.x)
+- `R_VERSION_MINOR` - Set the R verion minor digit (e.g., x.3.x)
+- `R_VERSION_PATCH` - Set the R verion patch digit (e.g., x.x.1)
+- `CRAN_MIRROR` - Set the CRAN mirror address
+
+**Note:** the arguments used in the build must be pre-defined in the corresponding Dockerfile. It is highly recommended, when using arguments with Docker, to set default values:
+
+from `./.devcontainer/Dockerfile.dev`
+``` Dockerfile
+# Step 2 - Set arguments and environment variables
+# Define arguments
+ARG VENV_NAME=VENV_NAME
+ARG R_VERSION_MAJOR=4
+ARG R_VERSION_MINOR=3
+ARG R_VERSION_PATCH=1
+ARG DEBIAN_FRONTEND=noninteractive
+ARG CRAN_MIRROR=https://cran.rstudio.com/
+ARG QUARTO_VER="1.3.450"
+```
+
+
+In addition, we add the following extensions:
+- [R for VScode](https://marketplace.visualstudio.com/items?itemName=REditorSupport.r)
+- [R Debugger](https://marketplace.visualstudio.com/items?itemName=RDebugger.r-debugger)
+- [Quarto](https://marketplace.visualstudio.com/items?itemName=quarto.quarto)
+- [Drawio preview](https://marketplace.visualstudio.com/items?itemName=purocean.drawio-preview)
+- [Markdown All in One](https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one)
+- [Docker](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-docker) 
+- [Python](https://marketplace.visualstudio.com/items?itemName=ms-python.python)
+- [Jupyter notebook](https://marketplace.visualstudio.com/items?itemName=ms-toolsai.jupyter)
+
+WWe are using the `build`
 ## Summary
 
 
