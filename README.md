@@ -1470,8 +1470,43 @@ In the following sections, we will continue to expand on the build option.
 
 ### Setting a Dynamic R Environment with Arguments
 
-When building a docker image, I love using arguments and environment variables as much as possible. This enables high customization and modification of the image characteristics without code change. In the following example, we will leverage the tutorial main `Dockerfile` and `devcontainer.json` settings available under the `.devecontainer` folder to build a dynamic R environment. This includes the ability to modify the R version to build an image with dynamic settings of the R and Quarto versions and the CRAN mirror:
+Up until now, we have gone over some basic techniques for setting up an R environment with Docker and VScode using the Dev Containers extension. While those methods are not robus, they are useful to expelain concepts related to using R with Docker and the Dev Container. In this section, we will delve deeper and construct a more dynamic and resilient R environment using environment variables. By utilizing environment variables, we can conveniently customize and adjust the environment's characteristics without having to modify or update the code. We will utilize the default Dev Containers setting available in this repository under the `./.devecontainer` folder:
 
+`./.devecontainer/` 
+```
+.
+├── Dockerfile.dev
+├── devcontainer.json
+├── install_packages.R
+├── install_quarto.sh
+├── packages.json
+└── requirements.txt
+```
+
+The folder includes the following helper files:
+- `packages.json` - a list of required R packages for the environment
+- `install_packages.R` - an R script that parse the list of packages from the `packages.json` file and install them
+- `install_quarto.sh` - a bash script that install Quarto
+- `requirements.txt` - a list of Python packages to install, mainly used to install `radian`
+
+We will use the Dockerfile we introduced on `The Dockerfile` section. Recall, the main functionality of this Dockerfile:
+- Install Debain dependencies
+- Install R and required packages
+- Install Quarto
+- Set Python virtual environment and install radian
+
+We use arguments and environment variables to set dynamicly the following parameters:
+- R version
+- Required R packages and their version
+- CRAN mirror 
+- Quarto
+- Python virtual environment name
+- Python packages
+
+
+The `devcontainer.json` file orcestrate this process by defining the Dockerfile arguments in the build:
+
+`./.devcontainer/devcontainer.json`
 ``` json
 {
     "name": "R Dev Environment",
@@ -1549,7 +1584,10 @@ In addition, we add the following extensions:
 - [Python](https://marketplace.visualstudio.com/items?itemName=ms-python.python)
 - [Jupyter notebook](https://marketplace.visualstudio.com/items?itemName=ms-toolsai.jupyter)
 
-WWe are using the `build`
+
+#### Updating 
+
+
 ## Summary
 
 
