@@ -3,5 +3,4 @@
     "r.bracketedPaste": true,
     "r.sessionWatcher": true,
     "r.plot.useHttpgd": true,
-    "grammarly.files.include": ["**/README.md", "**/readme.md", "**/*.txt"]
 }

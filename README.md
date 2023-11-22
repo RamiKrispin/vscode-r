@@ -1079,6 +1079,13 @@ In this tutorial, we will use [Radian](https://github.com/randy3k/radian) to run
 - Code completion
 - Syntax highlight
 
+
+<figure>
+<img src="images/radian-demo.gif" width="100%" align="center"/></a>
+<figcaption> Figure XX - Running R with Radian</figcaption>
+</figure>
+<br>
+
 To install `radian`, we will first set up a virtual environment with `venv`:
 
 ``` Dockerfile
@@ -1475,6 +1482,7 @@ Up until now, we have gone over some basic techniques for setting up an R enviro
 `./.devecontainer/` 
 ```
 .
+├── .Rprofile
 ├── Dockerfile.dev
 ├── devcontainer.json
 ├── install_packages.R
@@ -1485,17 +1493,18 @@ Up until now, we have gone over some basic techniques for setting up an R enviro
 
 The folder includes the following helper files:
 - `packages.json` - a list of required R packages for the environment
-- `install_packages.R` - an R script that parse the list of packages from the `packages.json` file and install them
-- `install_quarto.sh` - a bash script that install Quarto
+- `.Rprofile` - The R profile file
+- `install_packages.R` - an R script that parses the list of packages from the `packages.json` file and installs them
+- `install_quarto.sh` - a bash script that installs Quarto
 - `requirements.txt` - a list of Python packages to install, mainly used to install `radian`
 
-We will use the Dockerfile we introduced on `The Dockerfile` section. Recall, the main functionality of this Dockerfile:
-- Install Debain dependencies
+We will use the Dockerfile we introduced in `The Dockerfile` section. Recall, the main functionality of this Dockerfile:
+- Install Debian dependencies
 - Install R and required packages
 - Install Quarto
 - Set Python virtual environment and install radian
 
-We use arguments and environment variables to set dynamicly the following parameters:
+We use arguments and environment variables to set dynamically the following parameters:
 - R version
 - Required R packages and their version
 - CRAN mirror 
@@ -1504,7 +1513,7 @@ We use arguments and environment variables to set dynamicly the following parame
 - Python packages
 
 
-The `devcontainer.json` file orcestrate this process by defining the Dockerfile arguments in the build:
+The `devcontainer.json` file orchestrates this process by defining the Dockerfile arguments in the build:
 
 `./.devcontainer/devcontainer.json`
 ``` json
@@ -1585,7 +1594,152 @@ In addition, we add the following extensions:
 - [Jupyter notebook](https://marketplace.visualstudio.com/items?itemName=ms-toolsai.jupyter)
 
 
-#### Updating 
+Last but not least, we set the post-create command to launch `radian` after the build is complete. 
+
+
+# Add screedshot
+
+
+### VScode Settings for R
+
+The VScode IDE provides users with a high level of control over the IDE setting, from text fonts to extension settings. Generally, there are two methods in VScode to customize the IDE [settings](https://code.visualstudio.com/docs/getstarted/settings):
+- Settings menu (i.e., `Code` -> `Settings...` -> `Settings`)
+- The `settings.json` file
+
+
+<figure>
+<img src="images/vscode-settings.png" width="100%" align="center"/></a>
+<figcaption> Figure XX - VScode Settings menu   </figcaption>
+<br>
+</figure>
+
+
+ When using the Dev Containers extension to run a VScode session within a dockerized environment, it's important to note that the regular VScode settings won't apply. Any extensions that are installed on your local VScode won't be available in the dockerized environment. In the previous sections, we learned how to set extensions using the `devcontainer.json` file, and in this section, we will focus on how to define the extension settings inside the container using the `settings.json` file. In addition, we will review the recommended settings for the `R for VScode` extension.
+
+### The settings.json File
+
+By default, VScode uses the default settings defined in the settings menu. However, there might be situations where you want to customize the settings on a project level. In such cases, you can make use of the `settings.json` file. By adding the `settings.json` file to your project folder under the `.vscode` folder, you can modify and override the default settings of VScode on a project level. This gives you complete control over the settings you want to use for your project. 
+
+Below is the `settings.json` file we use in this repo to customize the functionality of the `R for VScode` extension:
+
+`.vscode/settings.json`
+```json
+{
+    "r.alwaysUseActiveTerminal": true,
+    "r.bracketedPaste": true,
+    "r.sessionWatcher": true,
+    "r.plot.useHttpgd": true,
+}
+```
+
+You can notice from the structure of the JSON file that settings use the following structure:
+```json
+{
+"Extension Name.Argument": Value
+}
+```
+
+Let's now review the functionality of the above four arguments:
+
+- `r.alwaysUseActiveTerminal` - or always use active terminal, when set to true, it will send the R code by default to an open session (as opposed to opening a new terminal)  
+- `r.bracketedPaste` - or bracketed paste, when set to true, will send an R code with brackets to the terminal. If set to false, any code with a bracket (e.g., for loop, if statement, etc.) will end up with an error.
+- `r.sessionWatcher` - or session watcher, when set to true, enables VScode to maintain the connection with an open R session in the terminal
+- `r.plot.useHttpgd` - or plot use httpgd, when set to true, will use the httpgd-based plot viewer instead of the base VScode R viewer
+
+More information about the R for VScode extension settings available [here](https://github.com/REditorSupport/vscode-R/wiki/Extension-settings).
+
+In the next section, we will review the key functionality of the environment we set.
+
+## Key Functionality
+
+After setting up the `Dockerfile`, `devcontainer.json`, and `settings.json` files, it is time to connect all the dots and review the main functionality of the R environment we set. To test the environment and demonstrate its functionality, we will use the R scripts under the test folder.
+
+### Running R code
+
+Let's start with the basics. Running R code with VScode is done via the terminal. In the environment we set, there are two options to run R code:
+- Vanilla R
+- Radian
+
+By default, when launching the environment, the post create command will launch on the terminal `radian`. Of course, you can modify it to vanilla `R` by setting the post create command to:
+
+```json
+"postCreateCommand": "R"
+```
+
+The main difference between the two is that vanilla `R` is fairly stable but lacks the auto-completion functionality. On the other hand, `radian` comes with nice auto-completion and colorful functionality, but it is less stable (compared to vanilla `R`).
+
+For example, let's run the below code:
+
+`./tests/plot.R`
+
+```R
+library(ggplot2)
+
+data(diamonds)
+
+head(diamonds)
+
+View(diamonds)
+
+d <- diamonds[sample(nrow(diamonds), 2000), ]
+
+
+ggplot(
+        data = d,
+        aes(x = carat, y = price, col = carat, size = carat)
+) +
+        geom_point()
+
+
+ggplot(
+        data = d,
+        aes(x = carat, y = price, col = cut, size = carat)
+) +
+        geom_point()
+
+ggplot(
+        data = d,
+        aes(x = carat, y = price, col = cut)
+) +
+        geom_point()
+```
+
+This code loads from the ggplot2 package the `diamonds` dataset, opens the dataset in the Viewer, and creates three different plots. If the extensions are set well, you should expect to see the below output:
+
+<figure>
+<img src="images/vscode-r_01.png" width="100%" align="center"/></a>
+<figcaption> Figure XX - Running R code with radian   </figcaption>
+<br>
+</figure>
+
+The script file is marked in the green box, the `radian` console is in the pink box, and the plot output is in the blue box. Note that the Viewer tab is next to the plot tab. 
+
+
+### Help Menu
+
+The R help functionality works the same in VScode with the `help()` function or using the `?` symbol together with the function as marked with the yellow box in the below figure:
+
+
+
+<figure>
+<img src="images/vscode-r_02.png" width="100%" align="center"/></a>
+<figcaption> Figure XX - Using the R help functionality  </figcaption>
+<br>
+</figure>
+
+
+In addition, when hovering the function, a tooltip window is opened with the function documentation as marked with the purple box in the above figure.
+
+### Data Viewer
+
+### Plot Viewer
+
+### HTML Widgets
+
+### Shiny Apps
+
+
+## Modify the Environment
 
 
 ## Summary
@@ -1595,7 +1749,8 @@ In addition, we add the following extensions:
 - Radian - https://github.com/randy3k/radian
 - Dev Containers - https://code.visualstudio.com/docs/devcontainers/containers
 - Dev Containers metadata reference - https://containers.dev/implementors/json_reference/
-
+- VScode Settings - https://code.visualstudio.com/docs/getstarted/settings
+- R for VScode - https://github.com/REditorSupport/vscode-R
 
 ## License
 
