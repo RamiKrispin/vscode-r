@@ -1080,7 +1080,34 @@ The last step in this process is to copy the `.Rprofile` file to the root folder
 COPY .Rprofile /root/
 ```
 
-The `.Rprofile` file allows us to set global configurations that R loads during the launch of a new session. Later in this tutorial, we will review the use case of this .Rprofile file.
+The `.Rprofile` file allows us to set global configurations that R loads during the launch of a new session. Later in this tutorial, we will dive into some of the functionality of this file:
+
+`.Rprofile`
+```R
+# Source: https://renkun.me/2020/04/14/writing-r-in-vscode-working-with-multiple-r-sessions/
+Sys.setenv(TERM_PROGRAM = "vscode")
+source(file.path(
+  Sys.getenv(
+    if (.Platform$OS.type == "windows") "USERPROFILE" else "HOME"
+  ),
+  ".vscode-R", "init.R"
+))
+
+# Source: https://github.com/REditorSupport/vscode-R/wiki/Plot-viewer#svg-in-httpgd-webpage
+if (interactive() && Sys.getenv("TERM_PROGRAM") == "vscode") {
+  if ("httpgd" %in% .packages(all.available = TRUE)) {
+    options(vsc.plot = FALSE)
+    options(device = function(...) {
+      httpgd::hgd(silent = TRUE)
+      .vsc.browser(httpgd::hgd_url(history = FALSE), viewer = "Beside")
+    })
+  }
+}
+
+# Set CRAN Mirror
+options(repos = Sys.getenv("CRAN_MIRROR"))
+
+```
 
 ### Installing radian
 
@@ -1765,7 +1792,10 @@ R comes with a rich data visualization ecosystem and functionality. That include
 
 #### Plot Viewer
 
+When working with static plots in VScode, they are typically converted to PNG files and displayed as images with the image viewer. However, this method can be inconvenient. The R for VScode extension offers a more elegant solution for viewing plots. It converts the images to SVG and opens them via HTTP WebSockets by using the httpgd package graphic device. 
 
+Let's now take a closer look at the settings we introduced earlier. To enable the R for VScode Plot Viewer (rather than the default VSCode option), we added the following setting to the settings.json file: default plot viewer.
+r.plot.useHttpgd: true
 
 
 
