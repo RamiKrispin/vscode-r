@@ -14,6 +14,10 @@ See also:
 <img src="images/vscode-shiny1024.gif" width="100%" align="center"/></a>
 
 </figure>
+
+<br>
+<br />
+
 Table of Contents:
 
 * [Motivation](https://github.com/RamiKrispin/vscode-r#motivation)
@@ -100,7 +104,8 @@ Installing VScode is straightforward - go to the VScode website https://code.vis
 <img src="images/vscode-download.png" width="100%" align="center"/></a>
 <figcaption> Figure 1 - Visual Studio Code download page</figcaption>
 </figure>
-
+<br>
+<br />
 
 Download the installation file and follow the instructions. 
 
@@ -114,8 +119,8 @@ Here is how to install an extension on VScode:
 <img src="images/vscode-extensions.png" width="100%" align="center"/></a>
 <figcaption> Figure 2 - Steps to install extension on VScode</figcaption>
 </figure>
-
 <br>
+<br />
 
 **Note:** The Dev Containers extension is required to launch the dockerized environment. We will see later in this tutorial how to set and install the necessary extensions for your dockerized environment automatically with the `devcontainer.json` file.
 
@@ -131,6 +136,7 @@ To install Docker Desktop, go to Docker website and follow the installation inst
 </figure>
 
 <br>
+<br />
 
 ### Docker Hub
 
@@ -222,6 +228,7 @@ The diagram below describes a high-level architecture of a Dockerized developmen
 </figure>
 
 <br>
+<br />
 
 
 This process includes the following components:
@@ -249,6 +256,7 @@ Let's now organize and order this process to a general workflow. The below diagr
 </figure>
 
 <br>
+<br />
 
 
 ## The Rocker Project
@@ -285,6 +293,7 @@ Generally, the VScode **Dev Container** extension lets you containerize your env
 </figure>
 
 <br>
+<br />
 
 **Note:** It is important to emphasize that this section covers the basic Docker requirements for this tutorial and is not an alternative to a full Docker tutorial or course. 
 
@@ -399,6 +408,7 @@ Docker builds images using a layers approach. Depending on the context, the dock
 </figure>
 
 <br>
+<br />
 
 The `docker inspect` command returns the image metadata details in a JSON format. That includes the environment variables, labels, layers and general metadata. In the following example, we will use [jq](https://jqlang.github.io/jq/) to extract the layers information from the metadata JSON file:
 
@@ -611,6 +621,7 @@ When setting your Dockerfile, you should be minded and strategic to the layers c
 </figure>
 
 <br>
+<br />
 
 
 In this case, we have a Dockerfile with four commands that are translated during the build time into four layers. What will happen if we add a fifth command and place it right after the third one? The docker engine will identify that the first and second commands in the Dockerfile did not change and, therefore, will use the corresponding cached layers (one and two), and rebuild the rest of the layers from scratch:
@@ -621,6 +632,7 @@ In this case, we have a Dockerfile with four commands that are translated during
 </figure>
 
 <br>
+<br />
 
 When planning your Dockerfile, if applicable,  a good practice is to place the commands that will most likely stay the same and keep new updates to the end of the file if possible.
 
@@ -985,6 +997,7 @@ As we are setting the R environment almost from scratch, there is a long list of
 </figure>
 
 <br>
+<br />
 
 
 ### Installing R 
@@ -1085,6 +1098,7 @@ In this tutorial, we will use [Radian](https://github.com/randy3k/radian) to run
 <figcaption> Figure XX - Running R with Radian</figcaption>
 </figure>
 <br>
+<br />
 
 To install `radian`, we will first set up a virtual environment with `venv`:
 
@@ -1186,6 +1200,7 @@ If you still need to install the Dev Containers extension or Docker Desktop, fol
 <figcaption> Figure 10 - The Dev Containers extension status bar symbol</figcaption>
 </figure>
 <br>
+<br />
 
 ### Setting the devcontainer.json file
 
@@ -1264,6 +1279,7 @@ Once you set the `devcontainer.json`, to launch the folder inside the container,
 </figure>
 
 <br>
+<br />
 
 The below video demonstrates the full process of launching the Python environment inside a container with the Dev Containers extension:
 
@@ -1273,7 +1289,8 @@ The below video demonstrates the full process of launching the Python environmen
 <figcaption> Figure 12 - Open a folder inside a container with the Dev Containers extension</figcaption>
 </figure>
 
-<br/>
+<br>
+<br />
 
 The next section focuses on customizing the R environment with the `devcontainer.json` file.
 
@@ -1353,6 +1370,7 @@ To run the following example, open the `./examples/ex-4` on a new session in VSc
 </figure>
 
 <br>
+<br />
 
 This error represents common issues when setting up a new environment - missing dependencies. In this case, one of the `languageserver` package dependencies -  the `xml2` package cannot be installed, as potentially, it is missing some Debian dependency (or dependencies). In the next section, we will review how to handle missing dependencies.
 
@@ -1371,6 +1389,7 @@ In the case of the `xml2` package installation, the error is intuitive:
 </figure>
 
 <br>
+<br />
 
 
 Which indicates that we are missing the libxml-2.0 Debian library. To fix this issue, we will use the following ad-hoc fix:
@@ -1414,6 +1433,7 @@ Now, it is working!
 </figure>
 
 <br>
+<br />
  
 
 ### Using the build Argument
@@ -1610,9 +1630,9 @@ The VScode IDE provides users with a high level of control over the IDE setting,
 <figure>
 <img src="images/vscode-settings.png" width="100%" align="center"/></a>
 <figcaption> Figure XX - VScode Settings menu   </figcaption>
-<br>
 </figure>
-
+<br>
+<br />
 
  When using the Dev Containers extension to run a VScode session within a dockerized environment, it's important to note that the regular VScode settings won't apply. Any extensions that are installed on your local VScode won't be available in the dockerized environment. In the previous sections, we learned how to set extensions using the `devcontainer.json` file, and in this section, we will focus on how to define the extension settings inside the container using the `settings.json` file. In addition, we will review the recommended settings for the `R for VScode` extension.
 
@@ -1654,6 +1674,8 @@ In the next section, we will review the key functionality of the environment we 
 
 After setting up the `Dockerfile`, `devcontainer.json`, and `settings.json` files, it is time to connect all the dots and review the main functionality of the R environment we set. To test the environment and demonstrate its functionality, we will use the R scripts under the test folder.
 
+In addition, we will see some of the applications and use cases of packages we installed (i.e., `httpgd`, etc.) and the settings we used on the `settings.json` file.
+
 ### Running R code
 
 Let's start with the basics. Running R code with VScode is done via the terminal. In the environment we set, there are two options to run R code:
@@ -1684,23 +1706,17 @@ View(diamonds)
 d <- diamonds[sample(nrow(diamonds), 2000), ]
 
 
-ggplot(
-        data = d,
-        aes(x = carat, y = price, col = carat, size = carat)
-) +
+ggplot(data = d,
+        aes(x = carat, y = price, col = carat, size = carat)) +
         geom_point()
 
 
-ggplot(
-        data = d,
-        aes(x = carat, y = price, col = cut, size = carat)
-) +
+ggplot(data = d,
+        aes(x = carat, y = price, col = cut, size = carat)) +
         geom_point()
 
-ggplot(
-        data = d,
-        aes(x = carat, y = price, col = cut)
-) +
+ggplot(data = d,
+        aes(x = carat, y = price, col = cut)) +
         geom_point()
 ```
 
@@ -1709,30 +1725,52 @@ This code loads from the ggplot2 package the `diamonds` dataset, opens the datas
 <figure>
 <img src="images/vscode-r_01.png" width="100%" align="center"/></a>
 <figcaption> Figure XX - Running R code with radian   </figcaption>
-<br>
 </figure>
+<br>
+<br />
 
 The script file is marked in the green box, the `radian` console is in the pink box, and the plot output is in the blue box. Note that the Viewer tab is next to the plot tab. 
 
 
 ### Help Menu
 
-The R help functionality works the same in VScode with the `help()` function or using the `?` symbol together with the function as marked with the yellow box in the below figure:
+The R help functionality works the same in VScode with the `help()` function or using the `?` symbol together with the function as marked with the yellow box in the figure below:
 
 
 
 <figure>
 <img src="images/vscode-r_02.png" width="100%" align="center"/></a>
 <figcaption> Figure XX - Using the R help functionality  </figcaption>
-<br>
 </figure>
+<br>
+<br />
 
 
-In addition, when hovering the function, a tooltip window is opened with the function documentation as marked with the purple box in the above figure.
+In addition, when hovering the function, a tooltip window is opened with the function documentation as marked with the purple box in the figure above.
 
 ### Data Viewer
 
-### Plot Viewer
+One of the nice functionalities of the R for VScode extension is the [Data Viewer](https://github.com/REditorSupport/vscode-R/wiki/Interactive-viewers), which, as its name implies, allows viewing different data formats in R. The viewer is interactive and supports different data objects such as `data.frame`, `matrix`, `list`, and `JSON`. As can be seen in the screenshot below, it enables to sort the data or filter it:
+
+<figure>
+<img src="images/vscode-viewer.gif" width="100%" align="center"/></a>
+<figcaption> Figure XX - Using the data viewer   </figcaption>
+</figure>
+<br>
+<br />
+
+### Data Visualization
+
+R comes with a rich data visualization ecosystem and functionality. That includes both static (`base-R graph`, `ggplot2`, etc.) and interactive applications (`plotly`, `leaflet`, `mapview`, etc.). The R for VScode extension provides a nice functionality to view both cases (static and interactive).
+
+#### Plot Viewer
+
+
+
+
+
+https://github.com/REditorSupport/vscode-R/wiki/Plot-viewer
+
 
 ### HTML Widgets
 
@@ -1750,7 +1788,8 @@ In addition, when hovering the function, a tooltip window is opened with the fun
 - Dev Containers - https://code.visualstudio.com/docs/devcontainers/containers
 - Dev Containers metadata reference - https://containers.dev/implementors/json_reference/
 - VScode Settings - https://code.visualstudio.com/docs/getstarted/settings
-- R for VScode - https://github.com/REditorSupport/vscode-R
+- R for VScode extension - https://github.com/REditorSupport/vscode-R
+- R for VScode extension Wiki - https://github.com/REditorSupport/vscode-R/wiki
 
 ## License
 
