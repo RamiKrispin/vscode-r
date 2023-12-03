@@ -1701,7 +1701,7 @@ In the next section, we will review the key functionality of the environment we 
 
 After setting up the `Dockerfile`, `devcontainer.json`, and `settings.json` files, it is time to connect all the dots and review the main functionality of the R environment we set. To test the environment and demonstrate its functionality, we will use the R scripts under the test folder.
 
-In addition, we will see some of the applications and use cases of packages we installed (i.e., `httpgd`, etc.) and the settings we used on the `settings.json` file.
+In addition, we will see some of the applications and use cases of packages we installed (i.e., `httpgd`, etc.) and the settings we used on the `settings.json` and `.Rprofile` files.
 
 ### Running R code
 
@@ -1792,20 +1792,72 @@ R comes with a rich data visualization ecosystem and functionality. That include
 
 #### Plot Viewer
 
-When working with static plots in VScode, they are typically converted to PNG files and displayed as images with the image viewer. However, this method can be inconvenient. The R for VScode extension offers a more elegant solution for viewing plots. It converts the images to SVG and opens them via HTTP WebSockets by using the httpgd package graphic device. 
+When working with static plots in VScode, they are typically converted to PNG files and displayed as images with the image viewer. However, this method can be inconvenient. The `R for VScode` extension offers a more elegant solution for viewing plots with the `Plot Viewer`. It converts the images to SVG and opens them via HTTP WebSockets by using the `httpgd` package graphic device:
 
-Let's now take a closer look at the settings we introduced earlier. To enable the R for VScode Plot Viewer (rather than the default VSCode option), we added the following setting to the settings.json file: default plot viewer.
-r.plot.useHttpgd: true
+<figure>
+<img src="images/vscode-plot-viewer.gif" width="100%" align="center"/></a>
+<figcaption> Figure XX - Using the R for VScode extension Plot Viewer for static plots  </figcaption>
+</figure>
+<br>
+<br />
 
 
+Let's now take a closer look at the settings we introduced earlier. To set the R for VScode `Plot Viewer` as default method in R to display plots as SVG files with the `httpgd` package, we added the below argument to the `settings.json` file:
 
-https://github.com/REditorSupport/vscode-R/wiki/Plot-viewer
+```json
+"r.plot.useHttpgd": true
+```
+And the below code chunk to the `.Rprofile`:
+
+```R
+if (interactive() && Sys.getenv("TERM_PROGRAM") == "vscode") {
+  if ("httpgd" %in% .packages(all.available = TRUE)) {
+    options(vsc.plot = FALSE)
+    options(device = function(...) {
+      httpgd::hgd(silent = TRUE)
+      .vsc.browser(httpgd::hgd_url(history = FALSE), viewer = "Beside")
+    })
+  }
+}
+```
+
+More information available on the `R for VScode` extension [documentation](https://github.com/REditorSupport/vscode-R/wiki/Plot-viewer).
 
 
-### HTML Widgets
+#### Interactive Visualization
+
+After we saw the `Plot Viewer` functionality in the previous section, we will review the  [Webpage Viewer](https://github.com/REditorSupport/vscode-R/wiki/Interactive-viewers#webpage-viewer) functionality for interactive data visualization in this section.
+
+The `Webpage Viewer` can support any R application that is based on an `HTML` application, including `plotly`, `leaflet`, and others. In the figure below, you can see the output of the `htmlwidgets.R` file located in the `tests` folder. It shows a plot of the diamonds dataset using the `plotly` package.
+
+<figure>
+<img src="images/vscode-webpage-viewer.png" width="100%" align="center"/></a>
+<figcaption> Figure XX - Using the R for VScode extension Webpage Viewer for interactive plots   </figcaption>
+</figure>
+<br>
+<br />
+
 
 ### Shiny Apps
 
+In the same way, as we saw in the previous section with interactive plots, you can also launch and view a Shiny App on VScode using the [Browser Viewer](https://github.com/REditorSupport/vscode-R/wiki/Interactive-viewers#browser-viewer). Once the app has launched on the web viewer, it will be exposed to a port and can be opened locally on your web browser. The `app.R` file under the `tests` folder provides an example of a simple app, as can be seen in Figure xx:
+
+<figure>
+<img src="images/vscode-shiny-app-example.png" width="100%" align="center"/></a>
+<figcaption> Figure XX - Launching Shiny app using the Browser Viewer   </figcaption>
+</figure>
+<br>
+<br />
+
+
+Please note that launching a Shiny app keeps the console occupied (as it would in a regular R session), and to stop a running session, click `Control + C`.  One of the main advantages of VScode is that you can open multiple R sessions and execute them in parallel as can see in Figure XX:
+
+<figure>
+<img src="images/vscode-shiny-app.gif" width="100%" align="center"/></a>
+<figcaption> Figure XX - Launching multiple Shiny app in VScode   </figcaption>
+</figure>
+<br>
+<br />
 
 ## Modify the Environment
 
