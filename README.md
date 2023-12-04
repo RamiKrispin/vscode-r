@@ -1319,6 +1319,54 @@ The below video demonstrates the full process of launching the Python environmen
 <br>
 <br />
 
+
+
+### Setting Environment Variables
+
+Using environment variables is a practical tool when working with containers. There are various reasons why you might want to use environment variables as part of your workflow. Security is the main reason. As mentioned previously, docker images are usually stored in either a public registry service (such as Docker Hub) or a private one shared with others. Regardless of the storage method, it is essential not to store any sensitive information inside an image, such as credentials, passwords, or data. Using environment variables enables us to load this type of information to the environment, which will be available only during the run time of the container. Obusely, this does not solve other security risks, such as network, but this is outside the scope of this tutorial.
+
+Nevertheless, this approach is also useful when collaborating with other developers, where each has different environment settings (folder paths, usernames, credentials, etc.). In this section, we will see two methods to set and load environment variables - first, via the `devcontainer.json` file using the `remoteEnv` argument, and second, using a dedicated text file.
+
+
+#### The remoteEnv Argument
+
+The `devcontainer.json` file enables to define environment variables with the `remoteEnv` argument. You can either explicitly define the environment variable on the`devcontainer.json`, for example:
+
+``` json
+"remoteEnv": {
+  "VAR1": "MY_VAR1",
+  "VAR2": "MY_VAR2"
+
+}
+```
+
+However, I recommend avoiding this approach as, typically, this file is under the control version, and therefore, you won't be able to store sensitive information such as passwords, etc. The best practice is to define each variable as a local environment variable and load it with the `localEnv` argument. For example, if you want to load user name and password, first define locally those variables (e.g., `MY_USER_NAME`, and `MY_PASSWORD`) and then load them as shown below:
+
+``` json
+"remoteEnv": {
+  "USER_NAME":  "${localEnv:MY_USER_NAME}",
+  "USER_PASSWORD": "${localEnv:MY_PASSWORD}"
+}
+```
+
+### Mounting Additional Volumes
+
+When you launch the Dev Containers extension, it automatically mounts the local folder to the container. However, there may be instances where you need to mount other local folders. For example, you might want to mount a local folder containing CSV files or any other data that is necessary for the environment but not present in the current folder. A simple way to month additional folders into the container is with the `mounts` argument in the `devcontainer.json` file. The mounts argument is a wrapper to the docker [mounts](
+https://docs.docker.com/build/guide/mounts/) argument. The below example, demonstrated how to mount a local folder with the path `my_csv_files` to the container:
+
+``` json
+"mounts": {
+  "source=my_csv_files,target=/home/my_csv_files,type=bind,consistency=cache"
+}
+```
+The `source` argument defines the folder path on the local machine, and the `target` argument defines the folder path on the container. The `consistency` argument defines the file system access performance. A more elegant approach is to set the local path as a local environment variable and use the `localEnv` method to set the `source` argument. For example:
+
+``` json
+"mounts": {
+  "source=${localEnv:MY_FOLDER_PATH},target=/home/my_csv_files,type=bind,consistency=cache"
+}
+```
+
 The next section focuses on customizing the R environment with the `devcontainer.json` file.
 
 ## Setting R environment
@@ -1647,6 +1695,7 @@ Last but not least, we set the post-create command to launch `radian` after the 
 # Add screedshot
 
 
+
 ### VScode Settings for R
 
 The VScode IDE provides users with a high level of control over the IDE setting, from text fonts to extension settings. Generally, there are two methods in VScode to customize the IDE [settings](https://code.visualstudio.com/docs/getstarted/settings):
@@ -1676,6 +1725,7 @@ Below is the `settings.json` file we use in this repo to customize the functiona
     "r.bracketedPaste": true,
     "r.sessionWatcher": true,
     "r.plot.useHttpgd": true,
+    "r.lsp.diagnostics": false
 }
 ```
 
@@ -1692,12 +1742,13 @@ Let's now review the functionality of the above four arguments:
 - `r.bracketedPaste` - or bracketed paste, when set to true, will send an R code with brackets to the terminal. If set to false, any code with a bracket (e.g., for loop, if statement, etc.) will end up with an error.
 - `r.sessionWatcher` - or session watcher, when set to true, enables VScode to maintain the connection with an open R session in the terminal
 - `r.plot.useHttpgd` - or plot use httpgd, when set to true, will use the httpgd-based plot viewer instead of the base VScode R viewer
+- `"r.lsp.diagnostics": false` - disable the default lintr diagnostic function via the language server package (you can set it to true if you find it useful)
 
 More information about the R for VScode extension settings available [here](https://github.com/REditorSupport/vscode-R/wiki/Extension-settings).
 
 In the next section, we will review the key functionality of the environment we set.
 
-## Key Functionality
+## Running R with VScode
 
 After setting up the `Dockerfile`, `devcontainer.json`, and `settings.json` files, it is time to connect all the dots and review the main functionality of the R environment we set. To test the environment and demonstrate its functionality, we will use the R scripts under the test folder.
 
@@ -1859,19 +1910,24 @@ Please note that launching a Shiny app keeps the console occupied (as it would i
 <br>
 <br />
 
-## Modify the Environment
-
 
 ## Summary
 
+In this tutorial, we learned how to set up a dockerized development environment for R with VScode and Docker. We explored the process of setting up an R environment with the Dev Containers extension. Although this tutorial does not focus on Docker, it covers some of the basics of Docker to make it easier for new users to get started. Additionally, we saw how to launch a containerized R development environment with the Dev Containers extension and how to use environment variables to parameterize and customize the environment seamlessly.
+
+We reviewed how to build a dockerized R environment from scratch and also looked at leveraging built-in images like the ones from the Rocker project. Overall, this tutorial provides a solid foundation for anyone looking to create a Docker-based R development environment.
 
 ## Resources
-- Radian - https://github.com/randy3k/radian
 - Dev Containers - https://code.visualstudio.com/docs/devcontainers/containers
 - Dev Containers metadata reference - https://containers.dev/implementors/json_reference/
-- VScode Settings - https://code.visualstudio.com/docs/getstarted/settings
+- Docker - https://www.docker.com/
+- Docker Hub - https://hub.docker.com/
 - R for VScode extension - https://github.com/REditorSupport/vscode-R
 - R for VScode extension Wiki - https://github.com/REditorSupport/vscode-R/wiki
+- Radian - https://github.com/randy3k/radian
+- VScode - https://code.visualstudio.com/
+- VScode Settings - https://code.visualstudio.com/docs/getstarted/settings
+
 
 ## License
 
