@@ -1349,6 +1349,25 @@ However, I recommend avoiding this approach as, typically, this file is under th
 }
 ```
 
+#### Using env File
+
+Alternatively, you can use an env file to store environment variables and load it during the run time of the container.  Let's set the env file under the `.devcontainer` folder:
+
+`.devcontainer/devcontainer.env`
+
+``` shell
+VAR1=VAR1
+VAR2=VAR2
+```
+
+Next, add the `runArgs` argument to the `devcontainer.json` following the below structure:
+
+``` shell
+"runArgs": ["--env-file",".devcontainer/devcontainer.env"]
+```
+
+**Note:** For the same security reasons as mentioned above, it is recommended, when using the env file approach, to mask the `devcontainer.env` file from version control by adding it to the `.gitignore` file.
+
 ### Mounting Additional Volumes
 
 When you launch the Dev Containers extension, it automatically mounts the local folder to the container. However, there may be instances where you need to mount other local folders. For example, you might want to mount a local folder containing CSV files or any other data that is necessary for the environment but not present in the current folder. A simple way to month additional folders into the container is with the `mounts` argument in the `devcontainer.json` file. The mounts argument is a wrapper to the docker [mounts](
