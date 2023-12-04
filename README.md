@@ -27,13 +27,14 @@ Table of Contents:
 * [The Rocker Project](https://github.com/RamiKrispin/vscode-r#the-rocker-project)
 * [Getting Started with Docker](https://github.com/RamiKrispin/vscode-r#getting-started-with-docker)
 * [Running R on Docker - the Hard Way](https://github.com/RamiKrispin/vscode-r#running-r-on-docker---the-hard-way)
+* [Setting R Development Environment with VScode](https://github.com/RamiKrispin/vscode-r#setting-r-development-environment-with-vscode)
 * [Setting the Dev Containers Extension](https://github.com/RamiKrispin/vscode-r#setting-the-dev-containers-extension)
 * Setting the R Environment
 * Setting Plots window
 * Setting Shiny
-* Summary
-* Resources
-* License
+* [Summary](https://github.com/RamiKrispin/vscode-r#summary)
+* [Resources](https://github.com/RamiKrispin/vscode-r#resources)
+* [License](https://github.com/RamiKrispin/vscode-r#license)
 
 
 ## Motivation
@@ -1369,7 +1370,7 @@ The `source` argument defines the folder path on the local machine, and the `tar
 
 The next section focuses on customizing the R environment with the `devcontainer.json` file.
 
-## Setting R environment
+## Setting the R environment
 
 This section focuses on setting up an R dockerized development environment with the Dev Containers extension. We will extend the use of the `devcontainer.json` file, starting from simple use cases to advanced settings. In addition, we review potential issues that you may encounter during the installation process of the R dependencies (e.g., packages, etc.).
 
@@ -1387,7 +1388,7 @@ Let's start with a simple example, importing a `base-r` image from the Rocker pr
 **Note:** The example is available in the examples folder - `examples/ex-3/`. To open and run the example, you must open the example folder in a new VScode session.
 
 
-# Add a record
+##### Add a record
 
 In this example, we use the following two arguments:
 - `name` - Defines the environment name
@@ -1552,7 +1553,7 @@ As you can notice in the above Dockerfile, we are still using the `r-base:4.3.1`
 
 We replaced the `image` argument with the `build` argument. We use the `dockerfile` and `context` arguments to define the `Dockerfile` to be used for this build and the folder path. In this case, the `.` defines the root folder. Last but not least, we set the `postCreateCommand` to open R in the terminal when launching the environment.
 
-# Add screenshot
+##### Add screenshot
 
 ### Build vs. Image
 
@@ -1692,7 +1693,7 @@ In addition, we add the following extensions:
 Last but not least, we set the post-create command to launch `radian` after the build is complete. 
 
 
-# Add screedshot
+##### Add screedshot
 
 
 
