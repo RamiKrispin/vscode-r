@@ -4,8 +4,10 @@ library(plotly)
 d <- diamonds[sample(nrow(diamonds), 1000), ]
 
 fig <- plot_ly(
-  d, x = ~carat, y = ~price,
-  color = ~carat, size = ~carat
+  d,
+  x = ~carat, y = ~price,
+  color = ~carat, size = ~carat,
+  type = "scatter", mode = "markers"
 )
 
 fig
