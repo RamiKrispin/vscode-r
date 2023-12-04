@@ -29,9 +29,8 @@ Table of Contents:
 * [Running R on Docker - the Hard Way](https://github.com/RamiKrispin/vscode-r#running-r-on-docker---the-hard-way)
 * [Setting R Development Environment with VScode](https://github.com/RamiKrispin/vscode-r#setting-r-development-environment-with-vscode)
 * [Setting the Dev Containers Extension](https://github.com/RamiKrispin/vscode-r#setting-the-dev-containers-extension)
-* Setting the R Environment
-* Setting Plots window
-* Setting Shiny
+* [Setting the R Environment](https://github.com/RamiKrispin/vscode-r#setting-the-r-environment)
+* [Running R with VScode](https://github.com/RamiKrispin/vscode-r#running-r-with-vscode)
 * [Summary](https://github.com/RamiKrispin/vscode-r#summary)
 * [Resources](https://github.com/RamiKrispin/vscode-r#resources)
 * [License](https://github.com/RamiKrispin/vscode-r#license)
