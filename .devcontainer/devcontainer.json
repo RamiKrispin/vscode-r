@@ -1,7 +1,7 @@
 {
     "name": "R Dev Environment",
     "build": {
-        "dockerfile": "Dockerfile.dev",
+        "dockerfile": "Dockerfile",
         "context": ".",
         "args": {
             "VENV_NAME": "R_ENV",
