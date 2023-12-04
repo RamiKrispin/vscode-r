@@ -17,6 +17,10 @@
             "*.Rmd": "rmd"
         }
     },
+    "runArgs": [
+        "--env-file",
+        ".devcontainer/devcontainer.env"
+    ]
     "customizations": {
         "vscode": {
             "extensions": [
