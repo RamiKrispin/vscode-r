@@ -764,7 +764,7 @@ This will enable, down the road, to update the environment just by updating the 
 
 Below is the `Dockerfile` we will use to set the R environment:
 
-`./.devcontainer/Dockerfile.dev`
+`./.devcontainer/Dockerfile`
 ```Dockerfile
 # Setting an R environment from scratch 
 # Step 1 - Import base image
@@ -772,7 +772,6 @@ FROM ubuntu:22.04
 
 # Step 2 - Set arguments and environment variables
 # Define arguments
-ARG PROJECT_NAME=PROJECT_NAME
 ARG VENV_NAME=VENV_NAME
 ARG R_VERSION_MAJOR=4
 ARG R_VERSION_MINOR=3
@@ -782,7 +781,6 @@ ARG CRAN_MIRROR=https://cran.rstudio.com/
 ARG QUARTO_VER="1.3.450"
 
 # Define environment variables
-ENV PROJECT_NAME=$PROJECT_NAME
 ENV VENV_NAME=$VENV_NAME
 ENV R_VERSION_MAJOR=$R_VERSION_MAJOR
 ENV R_VERSION_MINOR=$R_VERSION_MINOR
@@ -834,7 +832,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3.10-dev \
     python3.10-venv \
     python3-pip \
-&& rm -rf /var/lib/apt/lists/*
+    lsof \
+    && rm -rf /var/lib/apt/lists/*
 
 # Step 4 - Install R
 RUN wget https://cran.rstudio.com/src/base/R-${R_VERSION_MAJOR}/R-${R_VERSION_MAJOR}.${R_VERSION_MINOR}.${R_VERSION_PATCH}.tar.gz && \
@@ -896,7 +895,6 @@ Next, we will define the build arguments and set environment variables:
 ```Dockerfile
 # Step 2 - Set arguments and environment variables
 # Define arguments
-ARG PROJECT_NAME=PROJECT_NAME
 ARG VENV_NAME=VENV_NAME
 ARG R_VERSION_MAJOR=4
 ARG R_VERSION_MINOR=3
@@ -906,7 +904,6 @@ ARG CRAN_MIRROR=https://cran.rstudio.com/
 ARG QUARTO_VER="1.3.450"
 
 # Define environment variables
-ENV PROJECT_NAME=$PROJECT_NAME
 ENV VENV_NAME=$VENV_NAME
 ENV R_VERSION_MAJOR=$R_VERSION_MAJOR
 ENV R_VERSION_MINOR=$R_VERSION_MINOR
@@ -920,7 +917,7 @@ ENV CRAN_MIRROR=$CRAN_MIRROR
 This includes setting variables to define the R and Quarto versions, the R configurations, etc. The use of arguments during the build time allows us to modify and update the image settings as necessary. For instance, in the above `Dockerfile`, we used three arguments to indicate the major, minor, and path values of the R version. We set the default version as `4.3.1`. If required, we can modify the R version by assigning values to the image arguments using the `--build-arg` argument.  For example, the below build command will create an image with R version `4.1.0` and set the image name as `rkrispin/vscode-r` and tag it as `rv4.1.0`:
 
 ``` shell
-docker build .  -f ./.devcontainer/Dockerfile.dev \
+docker build .  -f ./.devcontainer/Dockerfile \
        --build-arg R_VERSION_MAJOR=4 \
        --build-arg R_VERSION_MINOR=3 \
        --build-arg R_VERSION_PATCH=1 \
@@ -1600,6 +1597,7 @@ Up until now, we have gone over some basic techniques for setting up an R enviro
 ```
 .
 ├── .Rprofile
+├── Dockerfile
 ├── Dockerfile.dev
 ├── devcontainer.json
 ├── install_packages.R
@@ -1637,7 +1635,7 @@ The `devcontainer.json` file orchestrates this process by defining the Dockerfil
 {
     "name": "R Dev Environment",
     "build": {
-        "dockerfile": "Dockerfile.dev",
+        "dockerfile": "Dockerfile",
         "context": ".",
         "args": {
             "VENV_NAME": "R_ENV",
@@ -1653,6 +1651,10 @@ The `devcontainer.json` file orchestrates this process by defining the Dockerfil
             "*.Rmd": "rmd"
         }
     },
+    "runArgs": [
+        "--env-file",
+        ".devcontainer/devcontainer.env"
+    ]
     "customizations": {
         "vscode": {
             "extensions": [
@@ -1686,7 +1688,7 @@ We feed to the build argument the following arguments:
 
 **Note:** the arguments used in the build must be pre-defined in the corresponding Dockerfile. It is highly recommended, when using arguments with Docker, to set default values:
 
-from `./.devcontainer/Dockerfile.dev`
+from `./.devcontainer/Dockerfile`
 ``` Dockerfile
 # Step 2 - Set arguments and environment variables
 # Define arguments
