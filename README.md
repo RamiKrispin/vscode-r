@@ -1,6 +1,6 @@
 # Setting R Development Environment with VScode and Docker
 
-🚧WIP 🏗️, pre spell checking🛠️
+🚧 WIP - **Draft** 🛠️
 
 This repo provides a step-by-step guide and a template for setting up an R development environment with VScode and Docker 🐳. Docker is an amazing tool, but it has some learning curve. This tutorial aims to reduce the entry barrier for learning tools such as Docker.
 
@@ -12,6 +12,7 @@ See also:
 
 <figure>
 <img src="images/vscode-shiny1024.gif" width="100%" align="center"/></a>
+<figcaption> Figure 1 - A dockerized R environment with VScode and the Dev Containers extension </figcaption>
 
 </figure>
 
@@ -102,7 +103,7 @@ The main requirements for this tutorial are setting VScode and Docker Desktop. I
 Installing VScode is straightforward - go to the VScode website https://code.visualstudio.com/ and click on the Download button (purple rectangle on the screenshot):
 <figure>
 <img src="images/vscode-download.png" width="100%" align="center"/></a>
-<figcaption> Figure 1 - Visual Studio Code download page</figcaption>
+<figcaption> Figure 2 - Visual Studio Code download page</figcaption>
 </figure>
 <br>
 <br />
@@ -117,7 +118,7 @@ Here is how to install an extension on VScode:
 - Last but not least, Click the install button (see the green rectangular) to install the extension
 <figure>
 <img src="images/vscode-extensions.png" width="100%" align="center"/></a>
-<figcaption> Figure 2 - Steps to install extension on VScode</figcaption>
+<figcaption> Figure 3 - Steps to install extension on VScode</figcaption>
 </figure>
 <br>
 <br />
@@ -132,7 +133,7 @@ Various ways exist to build and run Docker images on different operations system
 To install Docker Desktop, go to Docker website and follow the installation instructions according to your OS:
 <figure>
  <img src="images/docker-install.png" width="100%" align="center"/></a>
-<figcaption> Figure 3 - Docker Desktop download page</figcaption>
+<figcaption> Figure 4 - Docker Desktop download page</figcaption>
 </figure>
 
 <br>
@@ -224,7 +225,7 @@ Before diving into the core functionality of Docker, let's review the generic de
 The diagram below describes a high-level architecture of a Dockerized development environment with VScode. It might be overwhelming if you have never used Docker before, and it will make more sense (I hope) by the end of this section.
 <figure>
 <img src="images/docker-architecture.png" width="100%" align="center"/></a>
-<figcaption> Figure 4 - Development workflow with VScode and Docker</figcaption>
+<figcaption> Figure 5 - Development workflow with VScode and Docker</figcaption>
 </figure>
 
 <br>
@@ -252,7 +253,7 @@ Let's now organize and order this process to a general workflow. The below diagr
 
 <figure>
 <img src="images/docker-workflow.png" width="100%" align="center"/></a>
-<figcaption> Figure 5 - Development with VScode and Docker workflow</figcaption>
+<figcaption> Figure 6 - Development with VScode and Docker workflow</figcaption>
 </figure>
 
 <br>
@@ -289,7 +290,7 @@ Generally, the VScode **Dev Container** extension lets you containerize your env
 
 <figure>
 <img src="images/dockerfile to container.png" width="100%" align="center"/></a>
-<figcaption> Figure 6 - Docker general workflow</figcaption>
+<figcaption> Figure 7 - Docker general workflow</figcaption>
 </figure>
 
 <br>
@@ -404,7 +405,7 @@ Docker builds images using a layers approach. Depending on the context, the dock
 
 <figure>
 <img src="images/docker-layers.png" width="100%" align="center"/></a>
-<figcaption> Figure 7 - Example of a build output with respect to the Dockerfile</figcaption>
+<figcaption> Figure 8 - Example of a build output with respect to the Dockerfile</figcaption>
 </figure>
 
 <br>
@@ -617,7 +618,7 @@ When setting your Dockerfile, you should be minded and strategic to the layers c
 
 <figure>
 <img src="images/docker layers 1.png" width="100%" align="center"/></a>
-<figcaption> Figure 8 - Illustration of initial build of image. The left side represents the Dockerfile's commands and the right one the coorisponding layers</figcaption>
+<figcaption> Figure 9 - Illustration of initial build of image. The left side represents the Dockerfile's commands and the right one the coorisponding layers</figcaption>
 </figure>
 
 <br>
@@ -628,7 +629,7 @@ In this case, we have a Dockerfile with four commands that are translated during
 
 <figure>
 <img src="images/docker layers 2.png" width="100%" align="center"/></a>
-<figcaption> Figure 9 - Illustration of the caching process during the rebuild of an image</figcaption>
+<figcaption> Figure 10 - Illustration of the caching process during the rebuild of an image</figcaption>
 </figure>
 
 <br>
@@ -987,13 +988,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 As we are setting the R environment almost from scratch, there is a long list of dependencies. This includes some Debian dependencies that are required to install R and some of the packages and command line tools. We use the RUN command to execute apt-get command to install those dependencies. One of the main challenges in this type of build is to identify what dependencies required them in the first place. While it is not in the scope of this tutorial, here are some tips:
 - **Build log -** when the build fails, the build log provides information about the error type or failure reason. By default, the `docker build` returns a concise output, which may not contain the error information. To get the full build log output, set the progress argument as plain (`--progress=plain`) 
-- **System requirements -** when adding a new R package, check the package description to see if the `SystemRequirements` section is available. For example, one of the R environment requirements is the [httpgd](https://cran.r-project.org/web/packages/httpgd/index.html) package that enables running interactive R applications in VScode, such as Shiny applications, or HTML widgets, such as Plotly. The package description provides the package system requirements (as can be seen in Figure 10 below) -  [C++17](https://packages.debian.org/buster/g++), [libpng](https://packages.debian.org/buster/libpng-dev), [cairo](https://packages.debian.org/buster/libcairo2-dev), [freetype2](https://packages.debian.org/buster/freetype2-demos), [fontconfig](https://packages.debian.org/buster/fontconfig), which must be installed before installing this package
+- **System requirements -** when adding a new R package, check the package description to see if the `SystemRequirements` section is available. For example, one of the R environment requirements is the [httpgd](https://cran.r-project.org/web/packages/httpgd/index.html) package that enables running interactive R applications in VScode, such as Shiny applications, or HTML widgets, such as Plotly. The package description provides the package system requirements (as can be seen in Figure 11 below) -  [C++17](https://packages.debian.org/buster/g++), [libpng](https://packages.debian.org/buster/libpng-dev), [cairo](https://packages.debian.org/buster/libcairo2-dev), [freetype2](https://packages.debian.org/buster/freetype2-demos), [fontconfig](https://packages.debian.org/buster/fontconfig), which must be installed before installing this package
 
 
 
 <figure>
 <img src="images/httpgd-sys-req.png" width="100%" align="center"/></a>
-<figcaption> Figure 10 - The httpgd package system requirements on the package description</figcaption>
+<figcaption> Figure 11 - The httpgd package system requirements on the package description</figcaption>
 </figure>
 
 <br>
@@ -1122,7 +1123,7 @@ In this tutorial, we will use [Radian](https://github.com/randy3k/radian) to run
 
 <figure>
 <img src="images/radian-demo.gif" width="100%" align="center"/></a>
-<figcaption> Figure XX - Running R with Radian</figcaption>
+<figcaption> Figure 12 - Running R with Radian</figcaption>
 </figure>
 <br>
 <br />
@@ -1224,7 +1225,7 @@ If you still need to install the Dev Containers extension or Docker Desktop, fol
 
 <figure>
 <img src="images/dev_container_symbol.png" width="20%" align="center"/></a>
-<figcaption> Figure 10 - The Dev Containers extension status bar symbol</figcaption>
+<figcaption> Figure 13 - The Dev Containers extension status bar symbol</figcaption>
 </figure>
 <br>
 <br />
@@ -1302,18 +1303,18 @@ Once you set the `devcontainer.json`, to launch the folder inside the container,
 
 <figure>
 <img src="images/command-palette.png" width="100%" align="center"/></a>
-<figcaption> Figure 11 - the Dev Containers extensions Command Palette </figcaption>
+<figcaption> Figure 14 - the Dev Containers extensions Command Palette </figcaption>
 </figure>
 
 <br>
 <br />
 
-The below video demonstrates the full process of launching the Python environment inside a container with the Dev Containers extension:
+The below video demonstrates the full process of launching the R environment inside a container with the Dev Containers extension:
 
 
 <figure>
-<img src="images/open_dev_container.gif" width="100%" align="center"/></a>
-<figcaption> Figure 12 - Open a folder inside a container with the Dev Containers extension</figcaption>
+<img src="images/vscode-open-env.gif" width="100%" align="center"/></a>
+<figcaption> Figure 15 - Open a folder inside a container with the Dev Containers extension</figcaption>
 </figure>
 
 <br>
@@ -1456,11 +1457,11 @@ install.packages("languageserver")
 ```
 Please note that using the post-create command to install dependencies is **not a robust or efficient approach**. We will only use it to illustrate possible problems that may arise while installing R packages. Later, we will introduce more reliable methods for managing dependencies.
 
-To run the following example, open the `./examples/ex-4` on a new session in VScode and rebuild the container. To review the output of the `postCreateCommand` argument, click on the `show logs` option that pops on the bottom of the screen during this process or open the `Configuration` tab on the terminal window (ping rectangle in Figure 13 below). You should expect to see when this process is complete to run the following error message (marked in red):
+To run the following example, open the `./examples/ex-4` on a new session in VScode and rebuild the container. To review the output of the `postCreateCommand` argument, click on the `show logs` option that pops on the bottom of the screen during this process or open the `Configuration` tab on the terminal window (ping rectangle in Figure 16 below). You should expect to see when this process is complete to run the following error message (marked in red):
 
 <figure>
 <img src="images/languageserver-error.png" width="100%" align="center"/></a>
-<figcaption> Figure 13 - the output of the post create command, tring to install the languageserver package   </figcaption>
+<figcaption> Figure 16 - the output of the post create command, tring to install the languageserver package   </figcaption>
 </figure>
 
 <br>
@@ -1479,7 +1480,7 @@ In the case of the `xml2` package installation, the error is intuitive:
 
 <figure>
 <img src="images/xml2-error.png" width="100%" align="center"/></a>
-<figcaption> Figure 14 - the output of the post create command, tring to install the xml2 package   </figcaption>
+<figcaption> Figure 17 - the output of the post create command, tring to install the xml2 package   </figcaption>
 </figure>
 
 <br>
@@ -1519,11 +1520,11 @@ And we update the post-create command to execute this bash script:
 }
 ```
 
-Now, it is working!
+Now, it is working! As can be noticed in Figure 18, the post create command ran on the left terminal window, installed the `languageserver` package (marked in purple), and on the right terminal window, ran R session and loaded the `languageserver` package (marked in yellow):
 
 <figure>
-<img src="images/example-5.gif" width="100%" align="center"/></a>
-<figcaption> Figure 15 - Executing R from script   </figcaption>
+<img src="images/vscode-ex5.png" width="100%" align="center"/></a>
+<figcaption> Figure 18 - Executing R from script   </figcaption>
 </figure>
 
 <br>
@@ -1571,7 +1572,9 @@ As you can notice in the above Dockerfile, we are still using the `r-base:4.3.1`
 
 We replaced the `image` argument with the `build` argument. We use the `dockerfile` and `context` arguments to define the `Dockerfile` to be used for this build and the folder path. In this case, the `.` defines the root folder. Last but not least, we set the `postCreateCommand` to open R in the terminal when launching the environment.
 
-##### Add screenshot
+The main advantage of this approach over using the post create command is that the `build` is being cached after the first run time, whereas the post create command is not. 
+
+In the following section, we will compare between creating the image on the fly using the `build` argument with the alternative of importing an image using the `image` argument.
 
 ### Build vs. Image
 
@@ -1710,11 +1713,6 @@ In addition, we add the following extensions:
 
 Last but not least, we set the post-create command to launch `radian` after the build is complete. 
 
-
-##### Add screedshot
-
-
-
 ### VScode Settings for R
 
 The VScode IDE provides users with a high level of control over the IDE setting, from text fonts to extension settings. Generally, there are two methods in VScode to customize the IDE [settings](https://code.visualstudio.com/docs/getstarted/settings):
@@ -1724,7 +1722,7 @@ The VScode IDE provides users with a high level of control over the IDE setting,
 
 <figure>
 <img src="images/vscode-settings.png" width="100%" align="center"/></a>
-<figcaption> Figure XX - VScode Settings menu   </figcaption>
+<figcaption> Figure 19 - VScode Settings menu   </figcaption>
 </figure>
 <br>
 <br />
@@ -1821,7 +1819,7 @@ This code loads from the ggplot2 package the `diamonds` dataset, opens the datas
 
 <figure>
 <img src="images/vscode-r_01.png" width="100%" align="center"/></a>
-<figcaption> Figure XX - Running R code with radian   </figcaption>
+<figcaption> Figure 20 - Running R code with radian   </figcaption>
 </figure>
 <br>
 <br />
@@ -1831,19 +1829,19 @@ The script file is marked in the green box, the `radian` console is in the pink 
 
 ### Help Menu
 
-The R help functionality works the same in VScode with the `help()` function or using the `?` symbol together with the function as marked with the yellow box in the figure below:
+The R help functionality works the same in VScode with the `help()` function or using the `?` symbol together with the function as marked with the yellow box in Figure 21 below:
 
 
 
 <figure>
 <img src="images/vscode-r_02.png" width="100%" align="center"/></a>
-<figcaption> Figure XX - Using the R help functionality  </figcaption>
+<figcaption> Figure 21 - Using the R help functionality  </figcaption>
 </figure>
 <br>
 <br />
 
 
-In addition, when hovering the function, a tooltip window is opened with the function documentation as marked with the purple box in the figure above.
+In addition, when hovering the function, a tooltip window is opened with the function documentation as marked with the purple box in Figure 21.
 
 ### Data Viewer
 
@@ -1851,7 +1849,7 @@ One of the nice functionalities of the R for VScode extension is the [Data Viewe
 
 <figure>
 <img src="images/vscode-viewer.gif" width="100%" align="center"/></a>
-<figcaption> Figure XX - Using the data viewer   </figcaption>
+<figcaption> Figure 22 - Using the data viewer   </figcaption>
 </figure>
 <br>
 <br />
@@ -1866,7 +1864,7 @@ When working with static plots in VScode, they are typically converted to PNG fi
 
 <figure>
 <img src="images/vscode-plot-viewer.gif" width="100%" align="center"/></a>
-<figcaption> Figure XX - Using the R for VScode extension Plot Viewer for static plots  </figcaption>
+<figcaption> Figure 23 - Using the R for VScode extension Plot Viewer for static plots  </figcaption>
 </figure>
 <br>
 <br />
@@ -1898,11 +1896,11 @@ More information available on the `R for VScode` extension [documentation](https
 
 After we saw the `Plot Viewer` functionality in the previous section, we will review the  [Webpage Viewer](https://github.com/REditorSupport/vscode-R/wiki/Interactive-viewers#webpage-viewer) functionality for interactive data visualization in this section.
 
-The `Webpage Viewer` can support any R application that is based on an `HTML` application, including `plotly`, `leaflet`, and others. In the figure below, you can see the output of the `htmlwidgets.R` file located in the `tests` folder. It shows a plot of the diamonds dataset using the `plotly` package.
+The `Webpage Viewer` can support any R application that is based on an `HTML` application, including `plotly`, `leaflet`, and others. In Figure 24 below, you can see the output of the `htmlwidgets.R` file located in the `tests` folder. It shows a plot of the diamonds dataset using the `plotly` package.
 
 <figure>
 <img src="images/vscode-webpage-viewer.png" width="100%" align="center"/></a>
-<figcaption> Figure XX - Using the R for VScode extension Webpage Viewer for interactive plots   </figcaption>
+<figcaption> Figure 24 - Using the R for VScode extension Webpage Viewer for interactive plots   </figcaption>
 </figure>
 <br>
 <br />
@@ -1910,21 +1908,21 @@ The `Webpage Viewer` can support any R application that is based on an `HTML` ap
 
 ### Shiny Apps
 
-In the same way, as we saw in the previous section with interactive plots, you can also launch and view a Shiny App on VScode using the [Browser Viewer](https://github.com/REditorSupport/vscode-R/wiki/Interactive-viewers#browser-viewer). Once the app has launched on the web viewer, it will be exposed to a port and can be opened locally on your web browser. The `app.R` file under the `tests` folder provides an example of a simple app, as can be seen in Figure xx:
+In the same way, as we saw in the previous section with interactive plots, you can also launch and view a Shiny App on VScode using the [Browser Viewer](https://github.com/REditorSupport/vscode-R/wiki/Interactive-viewers#browser-viewer). Once the app has launched on the web viewer, it will be exposed to a port and can be opened locally on your web browser. The `app.R` file under the `tests` folder provides an example of a simple app, as can be seen in Figure 25:
 
 <figure>
 <img src="images/vscode-shiny-app-example.png" width="100%" align="center"/></a>
-<figcaption> Figure XX - Launching Shiny app using the Browser Viewer   </figcaption>
+<figcaption> Figure 25 - Launching Shiny app using the Browser Viewer   </figcaption>
 </figure>
 <br>
 <br />
 
 
-Please note that launching a Shiny app keeps the console occupied (as it would in a regular R session), and to stop a running session, click `Control + C`.  One of the main advantages of VScode is that you can open multiple R sessions and execute them in parallel as can see in Figure XX:
+Please note that launching a Shiny app keeps the console occupied (as it would in a regular R session), and to stop a running session, click `Control + C`.  One of the main advantages of VScode is that you can open multiple R sessions and execute them in parallel as can see in Figure 25:
 
 <figure>
 <img src="images/vscode-shiny-app.gif" width="100%" align="center"/></a>
-<figcaption> Figure XX - Launching multiple Shiny app in VScode   </figcaption>
+<figcaption> Figure 25 - Launching multiple Shiny app in VScode   </figcaption>
 </figure>
 <br>
 <br />
