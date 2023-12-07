@@ -1,6 +1,5 @@
 # Setting R Development Environment with VScode and Docker
 
-🚧 WIP - **Draft** 🛠️
 
 This repo provides a step-by-step guide and a template for setting up an R development environment with VScode and Docker 🐳. Docker is an amazing tool, but it has some learning curve. This tutorial aims to reduce the entry barrier for learning tools such as Docker.
 
@@ -18,6 +17,14 @@ See also:
 
 <br>
 <br />
+
+### Opne Issues
+
+- CRAN mirror settings do not load from the `.Rprofile`, see this open [issue](https://github.com/RamiKrispin/vscode-r/issues/10)
+- Future enhancements available [here](https://github.com/RamiKrispin/vscode-r/issues/11)
+
+
+
 
 Table of Contents:
 

@@ -89,6 +89,8 @@ RUN Rscript ./settings/install_packages.R
 
 # Installing Quarto
 RUN bash ./settings/install_quarto.sh $QUARTO_VER
+RUN echo "test"
+RUN echo "test2"
 COPY .Rprofile /root/
 
 # Step 5 - Set Python Environment and install radian
