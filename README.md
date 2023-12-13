@@ -18,7 +18,7 @@ See also:
 <br>
 <br />
 
-### Opne Issues
+### Open Issues
 
 - CRAN mirror settings do not load from the `.Rprofile`, see this open [issue](https://github.com/RamiKrispin/vscode-r/issues/10)
 - Future enhancements are available [here](https://github.com/RamiKrispin/vscode-r/issues/11)
