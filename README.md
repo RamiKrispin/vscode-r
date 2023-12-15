@@ -281,7 +281,7 @@ The main advantages of using images from the Rocker project as base images are:
 - Comes with R's core dependencies (Debian packages, etc.) 
 
 
-As mentioned above, you can run RStudio inside a container using a containerized RStudio Server. The Rocker project provides a built-in and ready to use images with RStduio Server. While it is not in the scope of this tutorial, it is a good alternative for VScode with the following limitations:
+As mentioned above, you can run RStudio inside a container using a containerized RStudio Server. The Rocker project provides a built-in and ready to use images with RStudio Server. While it is not in the scope of this tutorial, it is a good alternative for VScode with the following limitations:
 - It is under an AGPL-3 license and therefore, cannot be used for enterprise
 - Required some additional modifications and settings (e.g., mount local folders, git, etc.)
 
@@ -886,7 +886,7 @@ Let's now break down and explain those steps in further detail.
 
 ### Baseline Image
 
-Our first step is to import a baseline image. We will use the `FROM` command to import the official Ubunto version `22.04` image as our baseline image for this build:
+Our first step is to import a baseline image. We will use the `FROM` command to import the official Ubuntu version `22.04` image as our baseline image for this build:
 
 ```Dockerfile
 # Step 1 - Import base image
@@ -926,8 +926,8 @@ This includes setting variables to define the R and Quarto versions, the R confi
 ``` shell
 docker build .  -f ./.devcontainer/Dockerfile \
        --build-arg R_VERSION_MAJOR=4 \
-       --build-arg R_VERSION_MINOR=3 \
-       --build-arg R_VERSION_PATCH=1 \
+       --build-arg R_VERSION_MINOR=1 \
+       --build-arg R_VERSION_PATCH=0 \
        -t rkrispin/vscode-r:rv4.1.0
 ```
 
@@ -1148,10 +1148,10 @@ Once we have the virtual environment set, we can install `radian`. We will use t
 RUN pip3 install -r ./settings/requirements.txt
 ```
 
-Generally, since we install only `radain` you could also use:
+Generally, since we install only `radian` you could also use:
 
 ```Dockerfile
-RUN pip3 install radain
+RUN pip3 install radian
 ```
 
 ### Customize the R Environment
