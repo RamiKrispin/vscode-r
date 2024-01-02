@@ -720,7 +720,7 @@ Type 'q()' to quit R.
 ```
 
 
-In summary, the docker run command creates and runs a new container from an image. It enables running code and applications, or launching a server inside a container. The output is depenend on the Dockerfile settings. As we saw in the above example, you open and run R inside a containerized environment using an interactive mode.
+In summary, the docker run command creates and runs a new container from an image. It enables running code and applications or launching a server inside a container. The output is dependent on the Dockerfile settings. As we saw in the above example, you open and run R inside a containerized environment using an interactive mode.
 
 OK, we have R running inside a dockerized environment, so why should we not use it? Mainly due to the following reasons:
 - This is not a development environment, and it is harder (in my mind) to maintain and develop code from the terminal with respect to R IDEs such as RStudio or VScode. 
