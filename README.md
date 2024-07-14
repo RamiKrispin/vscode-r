@@ -1284,7 +1284,7 @@ Here is a typical structure of the `devcontainer.json` file:
             ]
         } 
     }, 
-    "postCreateCommand": "radian"
+    "postStartCommand": "radian"
 } 
 ```
 
@@ -1292,7 +1292,7 @@ In this example, we are using the following arguments:
 - `name` - Optional, defines the project name
 - `image` - Defines the docker image to containerized the project, in this case we use the `r-base:4.3.1` - base R image from the Rocker project
 - `extensions` - Optional, under the `customizations/vscode`, enables to set a list of extensions to install
-- `postCreateCommand` - Optional, enables to set a post-create command, in this case launching the `radian` on the terminal
+- `postStartCommand` - Optional, enables to set a post-startup command, in this case launching the `radian` on the terminal
 
 Here are some additional arguments that can be useful later on:
 - `build` - An alternative for the `image` argument, this argument lets you build the image during the launch time of the environment.
