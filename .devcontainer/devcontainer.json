@@ -9,18 +9,9 @@
             "R_VERSION_MINOR": "3",
             "R_VERSION_PATCH": "1",
             "CRAN_MIRROR": "https://cran.rstudio.com/",
-            "QUARTO_VER": "1.3.450"
+            "QUARTO_VER": "1.5.41"
         }
     },
-    "settings": {
-        "files.associations": {
-            "*.Rmd": "rmd"
-        }
-    },
-    "runArgs": [
-        "--env-file",
-        ".devcontainer/devcontainer.env"
-    ]
     "customizations": {
         "vscode": {
             "extensions": [
@@ -41,5 +32,8 @@
             ]
         }
     },
-    "postCreateCommand": "radian"
+    "runArgs": [
+        "--env-file",
+        ".devcontainer/devcontainer.env"
+    ]
 }
